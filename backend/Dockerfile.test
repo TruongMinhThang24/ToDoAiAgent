@@ -26,8 +26,8 @@ RUN python -m pip install --upgrade pip setuptools wheel \
 # Configure poetry to not create virtualenvs (container will be isolated)
 RUN poetry config virtualenvs.create false
 
-# Install dependencies
-RUN poetry install --no-interaction --no-ansi
+# Install dependencies (including dev: pytest, ruff)
+RUN poetry install --no-interaction --no-ansi --with dev
 
 # Copy rest of the backend source
 COPY . /app

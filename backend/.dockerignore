@@ -1,0 +1,15 @@
+# Bỏ qua các tệp nhạy cảm
+.env
+todos.log
+
+# Bỏ qua các tệp cơ sở dữ liệu
+# DỮ LIỆU phải nằm ngoài Image
+*.db
+*.db-shm
+*.db-wal
+todoapp.db
+dbchroma_storage/
+
+# Bỏ qua các tệp cache
+__pycache__/
+.venv/

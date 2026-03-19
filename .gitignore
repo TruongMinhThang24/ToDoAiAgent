@@ -1,0 +1,32 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# DB & Chroma (RAG vector store)
+*.db
+*.sqlite3
+dbchroma_storage/
+chroma.sqlite3
+data_level*.bin
+length.bin
+
+# Logs
+*.log
+logs/
+
+# Env & Venv
+.env
+venv/
+.venv/
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+.next/
+.node_modules/

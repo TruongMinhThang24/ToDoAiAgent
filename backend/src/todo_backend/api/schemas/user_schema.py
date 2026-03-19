@@ -1,0 +1,29 @@
+#D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\api\schemas\user_schema.py
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
+
+class UserVerification(BaseModel):
+    password: str
+    new_password: str = Field(min_length=6)
+
+class UserUpdateRequest(BaseModel):
+    email: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    phone_number: Optional[str]
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    username: str
+    first_name: str
+    last_name: str
+    is_active: bool
+    role: str
+    phone_number: Optional[str]
+
+    
+    class Config:
+            from_attributes = True

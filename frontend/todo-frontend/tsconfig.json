@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "bundler", // Đổi "node" thành "bundler" cho Next.js mới
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    // --- PHẦN SỬA LỖI ĐÃ DI CHUYỂN RA NGOÀI PLUGINS ---
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+    // ------------------------------------------------
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    // --- THÊM 2 DÒNG NÀY ĐỂ NHẬN DIỆN FILE .JSX ---
+    "**/*.js",
+    "**/*.jsx"
+    // ---------------------------------------------
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

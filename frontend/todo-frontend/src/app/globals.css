@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ...existing code... */
+
+/* ===== MARKDOWN CONTAINER ===== */
+.markdown-container {
+  @apply max-w-none;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.5;
+}
+
+.markdown-container table {
+  @apply w-full border-collapse my-2;
+  font-size: 0.8125rem; /* 13px cho table */
+}
+
+.markdown-container th {
+  @apply bg-gray-100 font-semibold text-gray-900;
+}
+
+.markdown-container td {
+  @apply text-gray-800;
+}
+
+.markdown-container p {
+  @apply mb-2 text-gray-900;
+}
+
+.markdown-container strong {
+  @apply font-bold text-gray-900;
+}
+
+/* ===== CHAT ANIMATIONS ===== */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}

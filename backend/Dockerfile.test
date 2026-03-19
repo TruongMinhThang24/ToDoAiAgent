@@ -2,15 +2,16 @@ FROM python:3.13-slim
 
 # Install build deps needed for some packages (asyncpg, cryptography, etc.)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       build-essential \
-       gcc \
-       libpq-dev \
-       libffi-dev \
-       libsasl2-dev \
-       libssl-dev \
-       git \
-       curl \
+     && apt-get install -y --no-install-recommends \
+         build-essential \
+         gcc \
+         libpq-dev \
+         libffi-dev \
+         libsasl2-dev \
+         libssl-dev \
+         git \
+         curl \
+         portaudio19-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

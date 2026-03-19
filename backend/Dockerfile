@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Cài đặt các công cụ cần thiết để build các package Python (ví dụ: psycopg2 cho Postgres)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc libpq-dev && \
+    apt-get install -y --no-install-recommends gcc libpq-dev portaudio19-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy file requirements (Đảm bảo bạn đã có file requirements.txt trong thư mục backend)
@@ -27,7 +27,7 @@ WORKDIR /app
 
 # Chỉ cài đặt thư viện runtime cho PostgreSQL (nhẹ hơn libpq-dev rất nhiều)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libpq5 && \
+    apt-get install -y --no-install-recommends libpq5 portaudio19-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Tạo user không có quyền root (Security Best Practice)

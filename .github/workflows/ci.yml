@@ -26,6 +26,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
 
+      - name: Ensure ruff available
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
       - name: Install backend dependencies (Poetry)
         working-directory: ./backend
         run: |

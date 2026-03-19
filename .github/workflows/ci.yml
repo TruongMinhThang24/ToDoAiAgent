@@ -75,13 +75,13 @@ jobs:
           node-version: "18"
           
       - name: Install dependencies
-        working-directory: ./frontend
+        working-directory: ./frontend/todo-frontend
         run: npm ci || npm install
         
       - name: 📝 Frontend Code Quality (ESLint)
-        working-directory: ./frontend
+        working-directory: ./frontend/todo-frontend
         run: npm run lint
         
       - name: 🏗️ Test Build
-        working-directory: ./frontend
+        working-directory: ./frontend/todo-frontend
         run: npm run build

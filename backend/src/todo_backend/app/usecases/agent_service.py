@@ -276,7 +276,8 @@ class AgentService:
             logger.info(f"  - Tools: {[tool.name for tool in self.agent_executor.tools] if hasattr(self.agent_executor, 'tools') else 'Unknown'}")
             logger.info(f"📤 Agent invoked with query: '{user_query}'")
             
-            response = self.agent_executor.invoke(inputs, config=config)
+            # Use async invocation (ainvoke) to match async-safe checkpointer
+            response = await self.agent_executor.ainvoke(inputs, config=config)
 
             # --- PARSE RESPONSE ---
             last_message = response.get("messages", [])[-1]

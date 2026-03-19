@@ -14,6 +14,7 @@ from todo_backend.api.routers.notifications import \
 from todo_backend.api.routers.admin import router as admin_router
 from todo_backend.api.routers.auth import router as auth_router
 from todo_backend.api.routers.chat import router as chat_router
+from todo_backend.api.routers.agent import router as agent_router
 from todo_backend.api.routers.error_test import router as error_test_router
 from todo_backend.api.routers.todos import router as todos_router
 from todo_backend.api.routers.user import router as user_router
@@ -40,6 +41,7 @@ models.Base.metadata.create_all(bind=engine)
 
 # --- (INCLUDE ROUTER MỚI) ---
 app.include_router(chat_router, prefix="/api/v1")
+app.include_router(agent_router, prefix="/api/v1")
 app.include_router(notification_router, prefix="/api/v1")
 app.include_router(auth_router)
 app.include_router(todos_router, prefix="/api/v1")

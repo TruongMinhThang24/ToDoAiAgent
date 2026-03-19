@@ -2,6 +2,7 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   // --- THÊM PHẦN NÀY ĐỂ SỬA LỖI ---
   turbopack: {
     // Chỉ định rõ thư mục gốc của dự án là thư mục hiện tại ('.')

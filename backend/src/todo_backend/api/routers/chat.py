@@ -6,12 +6,12 @@ import uuid
 
 import urllib.parse
 from datetime import datetime
-from langgraph.checkpoint.memory import MemorySaver
+from typing import Any as _Any
 from pydub import AudioSegment
 from typing import Annotated, Any, Dict, List, Optional
 from langchain_tavily import TavilySearch
 import docx
-from langgraph.checkpoint.sqlite import SqliteSaver
+# checkpointer is now async Postgres-backed; use generic typing
 from fastapi.responses import StreamingResponse
 from ...infrastructure.agent.gemini_tts_client import GeminiTSSClient
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form , status 
@@ -55,7 +55,7 @@ def get_db():
 db_dependency = Annotated[Session , Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 model_dependency = Annotated[ChatGoogleGenerativeAI , Depends(get_gemini_model)]
-memory_dependency = Annotated[SqliteSaver , Depends(get_checkpointer)]
+memory_dependency = Annotated[_Any, Depends(get_checkpointer)]
 rag_usecase_dependency = Annotated[RAGUseCases, Depends(get_rag_usecase)]
 tavily_dependency = Annotated[TavilySearch , Depends(get_tavily_tool)]
 def get_agent_service(
@@ -126,17 +126,27 @@ async def chat_history(thread_id: str, user: user_dependency, checkpointer: memo
     
     config = {"configurable": {"thread_id": thread_id}}
 
-    checkpoint_tuple = checkpointer.get_tuple(config)
+    # Try async load() (async saver) then fall back to sync loaders
+    checkpoint_data = None
+    try:
+        if hasattr(checkpointer, 'load'):
+            checkpoint_data = await checkpointer.load(thread_id)
+        elif hasattr(checkpointer, 'load_sync'):
+            checkpoint_data = checkpointer.load_sync(thread_id)
+    except Exception as e:
+        logger.error(f"Error loading checkpoint for {thread_id}: {e}", exc_info=True)
 
-    if not checkpoint_tuple:
-        logger.warning(f"Không tìm thấy lịch sử cho thread {thread_id}") 
+    if not checkpoint_data:
+        logger.warning(f"Không tìm thấy lịch sử cho thread {thread_id}")
         return []
 
-    current_state_checkpoint = checkpoint_tuple.checkpoint 
-
-    current_state_data = current_state_checkpoint.get("channel_values", {})
-    
-    messages_list: List[BaseMessage]= current_state_data.get("messages", [])
+    # Support different checkpoint formats: prefer channel_values.messages, or messages
+    current_state_data = checkpoint_data.get("channel_values") if isinstance(checkpoint_data, dict) and checkpoint_data.get("channel_values") else checkpoint_data
+    messages_list: List[BaseMessage] = []
+    if isinstance(current_state_data, dict):
+        messages_list = current_state_data.get("messages", [])
+    elif isinstance(checkpoint_data, dict) and checkpoint_data.get("messages"):
+        messages_list = checkpoint_data.get("messages")
     
     if not messages_list:
         logger.warning(f"Tìm thấy checkpoint cho {thread_id} nhưng không có tin nhắn.")

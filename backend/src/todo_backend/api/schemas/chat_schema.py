@@ -15,5 +15,10 @@ class ChatRequest(BaseModel):
     message: str
     thread_id: Optional[str]
 
+class AgentExecuteRequest(BaseModel):
+    action_type: str
+    user_prompt: str
+    metadata: Optional[dict] = {}
+
 class AddDocumentRequest(BaseModel):
     text: str

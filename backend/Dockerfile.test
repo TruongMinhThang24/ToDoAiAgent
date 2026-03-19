@@ -1,0 +1,35 @@
+FROM python:3.13-slim
+
+# Install build deps needed for some packages (asyncpg, cryptography, etc.)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       build-essential \
+       gcc \
+       libpq-dev \
+       libffi-dev \
+       libsasl2-dev \
+       libssl-dev \
+       git \
+       curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy only lock/project first for faster installs
+COPY pyproject.toml poetry.lock /app/
+
+# Install poetry
+RUN python -m pip install --upgrade pip setuptools wheel \
+    && pip install poetry==1.8.1
+
+# Configure poetry to not create virtualenvs (container will be isolated)
+RUN poetry config virtualenvs.create false
+
+# Install dependencies
+RUN poetry install --no-interaction --no-ansi
+
+# Copy rest of the backend source
+COPY . /app
+
+# Default command runs tests (can be overridden)
+CMD ["poetry", "run", "pytest", "-q"]

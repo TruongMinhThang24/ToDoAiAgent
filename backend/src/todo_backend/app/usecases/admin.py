@@ -1,6 +1,6 @@
 # D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\app\usecases\admin.py
 import logging
-from typing import List, Optional
+from typing import List
 
 from todo_backend.domain.entities.models import Todo, Users
 from todo_backend.domain.repositories_interface.todo_repository import \
@@ -30,7 +30,7 @@ class AdminUseCases:
 
     # --- TODO MANAGEMENT ---
     def get_all_todos(self) -> List[Todo]:
-        logger.info(f"Fetching all todos for admin")
+        logger.info("Fetching all todos for admin")
         return self.todo_repo.get_all()
 
     def delete_todo(self, todo_id: int) -> bool:

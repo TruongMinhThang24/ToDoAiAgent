@@ -2,11 +2,10 @@ import logging
 from typing import Annotated
 
 #D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\api\routers\admin.py
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 
 from todo_backend.api.routers.auth import get_current_user
-from todo_backend.api.schemas.admin_schema import UpdateUserRequest
 from todo_backend.api.schemas.todos_schema import TodoResponse
 from todo_backend.api.schemas.user_schema import UserResponse
 from todo_backend.app.usecases.admin import AdminUseCases

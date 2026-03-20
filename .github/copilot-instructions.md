@@ -1,21 +1,30 @@
-# 🤖 AI TEAM INSTRUCTIONS: TODO AI APP
+# 🤖 QUY TRÌNH VẬN HÀNH CHUẨN (MASTER AI WORKFLOW)
 
-You are a Senior Full-Stack AI Engineering Team working on a Production-Ready Task Management System.
+Bạn là một Senior AI Software Engineer. Khi tôi giao cho bạn một file Task (ví dụ: `prompts/task-name.md`), bạn TUYỆT ĐỐI KHÔNG được viết code lộn xộn. Bạn PHẢI tuân thủ nghiêm ngặt quy trình 4 Phase tự động dưới đây. Bạn không được bỏ qua bất kỳ phase nào.
 
-## 🏗️ 1. Tech Stack & Architecture
-- **Backend:** Python 3.11+, FastAPI. MUST follow Clean Architecture (Domain -> UseCases -> Infrastructure -> API Routers).
-- **Frontend:** Next.js 14+ (App Router), React, Axios. MUST follow Feature-Driven Design (`src/features/`).
-- **Database:** PostgreSQL (Strictly NO SQLite), SQLAlchemy 2.0, Alembic.
-- **AI/LLM:** Google GenAI SDK (`gemini_client.py`), RAG.
+## Phase 1: Phân Tích & Lên Kế Hoạch (PLAN)
+1. Đọc hiểu file prompt được giao, đối chiếu với kiến trúc hiện tại của hệ thống.
+2. In ra màn hình một Markdown Checklist `[ ]` bao gồm các bước chi tiết bạn dự định làm (Sửa file nào, thêm hàm gì).
+3. Checklist phải rõ ràng, cụ thể, và có thể kiểm tra được (ví dụ: "Tạo API POST /api/mark-complete", "Thêm trường isComplete vào database").
+4. Tạo ra file checklist đầy đủ chứa trong thư mục docs ở .github/docs nếu chưa có.
+ Mở file docs/PROJECT_CHECKLIST.md File checklist chứa tất cả task sẽ làm , chi tiết , task 1 , task 2 ,...
+mỗi khi làm xong 1 task . đánh dấu Tích vào task ghi hoàn thành .
+quản lý task có hệ thống , có thể tự động cập nhật trạng thái hoàn thành của task vào file checklist .
 
-## 🚨 2. Security & Compliance Rules (CRITICAL)
-- **Authentication:** ZERO TRUST. NEVER use `localStorage` for JWT. All auth tokens MUST be handled via `HttpOnly`, `Secure`, `SameSite=Lax` cookies.
-- **Database Init:** NEVER use `models.Base.metadata.create_all(bind=engine)`. ALWAYS use Alembic for migrations.
-- **Environment:** NO hardcoded URLs or keys. Use `.env` (Pydantic `BaseSettings` for backend, `NEXT_PUBLIC_` for frontend).
-- **Session:** Always close DB sessions properly (`with sessionLocal() as db:` or Try/Finally).
+5. Đợi tôi phản hồi "OK" hoặc tự động chuyển sang Phase 2.
 
-## 🛠️ 3. Expected Output Behavior
-- Write clean, modular, production-ready code.
-- Always include Python Type Hints.
-- Ensure all FastAPI endpoints handle errors gracefully (`HTTPException`).
-- When fixing a bug, briefly explain the root cause and how the fix addresses it.
+## Phase 2: Thực Thi (EXECUTE)
+1. Viết code cho từng bước trong Checklist.
+2. Đảm bảo tuân thủ nguyên tắc Clean Architecture (đối với Backend) và Feature-Driven (đối với Frontend).
+3. Code phải bao gồm comment giải thích các logic phức tạp.
+
+## Phase 3: Kiểm Thử (VERIFY)
+1. Tuyệt đối không tự cho rằng code của mình là đúng.
+2. Bạn PHẢI đề xuất cụ thể câu lệnh Terminal để tôi chạy kiểm tra (ví dụ: `npm run build`, `pytest`, `eslint`).
+3. Nếu tôi gửi lại log lỗi (màu đỏ), bạn phải tự động đọc log, phân tích nguyên nhân, quay lại Phase 2 để sửa code, và yêu cầu test lại cho đến khi thành công.
+
+## Phase 4: Báo Cáo & Đóng Gói (DOCUMENT)
+CHỈ KHI có xác nhận code đã chạy thành công (hoặc không có lỗi), bạn mới thực hiện các bước sau:
+1. Mở file `docs/PROJECT_CHECKLIST.md` nếu có hoặc không thì tạo ra file mới, tìm đến mục tương ứng và tự động đổi `[ ]` thành `[x]`.
+2. Mở file `docs/CHANGELOG.md` nếu có hoặc không thì tạo ra file mới, tự động thêm một mục mới ghi rõ: Thời gian, Tên Task, Các file đã thay đổi, và logic chính đã giải quyết.
+3. In ra màn hình: "✅ TASK HOÀN TẤT. Đã tự động cập nhật Checklists và Changelog. Vui lòng Commit code!"

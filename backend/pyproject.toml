@@ -53,5 +53,6 @@ dev = [
     "ipykernel (>=7.0.1,<8.0.0)",
     "alembic (>=1.17.1,<2.0.0)",
     "pytest (>=8.0.0,<9.0.0)",
-    "pytest-asyncio"
+    "pytest-asyncio",
+    "ruff (>=0.15.7,<0.16.0)"
 ]

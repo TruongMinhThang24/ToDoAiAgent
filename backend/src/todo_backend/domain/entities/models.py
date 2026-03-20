@@ -2,7 +2,6 @@
 import logging
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, event , DateTime
-from typing import Optional
 from todo_backend.infrastructure.database.database import Base
 
 logger = logging.getLogger(__name__)

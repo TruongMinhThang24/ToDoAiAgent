@@ -4,7 +4,6 @@ from typing import List, Optional
 from langchain_core.tools import tool, BaseTool
 import pytz
 from sqlalchemy.orm import Session
-from typing import List
 from ...app.usecases.todos import \
     TodoUseCases  
 from ..repositories.todo_repository_impl import TodoRepositoryImpl
@@ -170,7 +169,7 @@ def execute_add_todo(db: Session, owner_id: int, title: str, priority: int = 1, 
     logger.info(f"Executing add_todo logic for user {owner_id}")
     clarify_msg = _validate_todo_creation(title, description,due_date)
     if clarify_msg:
-        logger.info(f"[ADD_TODO] Validation failed → Returning clarification")
+        logger.info("[ADD_TODO] Validation failed → Returning clarification")
         return clarify_msg
     due_date_obj: Optional[datetime.datetime] = None
     if due_date:
@@ -457,7 +456,7 @@ def execute_search_internet(query: str , tavily_tools: TavilySearch ) -> str:
         logger.error("[TAVILY_LOGIC] FATAL ERROR: tavily_tool is None!")
         return "Lỗi hệ thống: Công cụ tìm kiếm (Tavily) không được khởi tạo."
     try:
-        logger.info(f"[TAVILY_LOGIC] Preparing to call tavily_tool.invoke()....")
+        logger.info("[TAVILY_LOGIC] Preparing to call tavily_tool.invoke()....")
         results_string: str = tavily_tools.invoke(query)
         logger.info(f"[TAVILY_LOGIC] Tavily returned {len(results_string)} results.")
         if not results_string:

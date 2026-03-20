@@ -1,8 +1,7 @@
 # src/todo_backend/infrastructure/agent/dependencies.py
 import logging
-import json
 import asyncio
-from typing import Optional, Any
+from typing import Optional
 
 from flashrank import Ranker
 from langchain_google_genai import (ChatGoogleGenerativeAI,
@@ -13,7 +12,7 @@ from ...config.setting import settings
 from ..repositories.rag_repository_impl import ChromaRAGRepository
 from langchain_tavily import TavilySearch
 
-from sqlalchemy import Table, Column, Integer, String, JSON, MetaData, Text
+from sqlalchemy import Table, Column, Integer, String, JSON, MetaData
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from sqlalchemy.sql import select
 logger = logging.getLogger(__name__)

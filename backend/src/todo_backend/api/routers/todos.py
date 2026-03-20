@@ -35,7 +35,7 @@ async def create_todo(
     todo_request: TodoRequest
 ):
     if user is None:
-        logging.warning(f" Unauthorized attempt to create todo")
+        logging.warning(" Unauthorized attempt to create todo")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     logging.info(f"Creating a new todo for user ID: {user['id']}")

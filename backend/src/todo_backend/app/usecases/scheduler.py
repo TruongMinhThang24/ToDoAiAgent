@@ -1,6 +1,6 @@
 # backend/src/todo_backend/app/scheduler.py
 import logging
-from datetime import datetime, timedelta,timezone
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.orm import Session
@@ -45,7 +45,7 @@ async def check_due_todos():
         upcoming_todos = db.query(Todo).filter(
             Todo.due_date >= now_utc_naive,
             Todo.due_date <= due_soon_limit_naive,
-            Todo.completed == False
+            Todo.completed.is_(False)
         ).all()
         if not upcoming_todos:
             logger.info("Scheduler: Không tìm thấy todo nào sắp hết hạn.")

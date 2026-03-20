@@ -6,9 +6,11 @@ import time
 from fastapi.middleware.cors import CORSMiddleware
 from todo_backend.app.usecases.scheduler import start_scheduler
 import psutil
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from todo_backend.api.security.csrf import validate_csrf_request
 from todo_backend.api.routers.notifications import \
     router as notification_router
 from todo_backend.api.routers.admin import router as admin_router
@@ -19,7 +21,7 @@ from todo_backend.api.routers.error_test import router as error_test_router
 from todo_backend.api.routers.todos import router as todos_router
 from todo_backend.api.routers.user import router as user_router
 from todo_backend.domain.entities import models
-from todo_backend.infrastructure.database.database import (Base, engine,
+from todo_backend.infrastructure.database.database import (engine,
                                                            sessionLocal)
 #import error_handling for main.py
 from todo_backend.infrastructure.error_handling.error_handler import \
@@ -33,6 +35,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+
+@app.middleware("http")
+async def csrf_middleware(request, call_next):
+    """Enforce CSRF cho request ghi dữ liệu khi dùng cookie-based auth."""
+    try:
+        await validate_csrf_request(request)
+    except HTTPException as exc:
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    return await call_next(request)
 
 #register global handling
 error_handler.register_app_handlers(app)

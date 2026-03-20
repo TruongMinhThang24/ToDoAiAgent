@@ -1,10 +1,11 @@
 #D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\api\routers\auth.py
 import logging
+import secrets
 from datetime import timedelta
 from typing import Annotated
 from jose import JWTError, jwt
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from todo_backend.api.schemas.auth_schema import CreateUserRequest, Token , CreateForUserRequest
@@ -22,7 +23,6 @@ SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 # Dependency
 def get_db():
@@ -59,7 +59,8 @@ async def create_for_user(
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: db_dependency
+    db: db_dependency,
+    response: Response,
 ):
     usecase = AuthUseCases(UserAuthRepositoryImpl(db))
     user = usecase.authenticate_user(form_data.username, form_data.password)
@@ -69,7 +70,32 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    token = usecase.create_access_token(user.username, user.id, user.role, timedelta(minutes=20))
+
+    # Cookie age bám theo TTL của access token để đồng bộ thời gian sống.
+    access_token_ttl = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = usecase.create_access_token(user.username, user.id, user.role, access_token_ttl)
+
+    # SECURITY: Lưu JWT trong HttpOnly cookie để giảm rủi ro token bị đánh cắp qua XSS.
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        secure=False,  # Dev localhost; production nên dùng True theo env.
+        samesite="lax",
+        max_age=int(access_token_ttl.total_seconds()),
+    )
+
+    # SECURITY: CSRF token (double-submit cookie) để frontend đính kèm header X-CSRF-Token.
+    csrf_token = secrets.token_urlsafe(32)
+    response.set_cookie(
+        key="csrf_token",
+        value=csrf_token,
+        httponly=False,
+        secure=False,
+        samesite="lax",
+        max_age=int(access_token_ttl.total_seconds()),
+    )
+
     return {"access_token": token, "token_type": "bearer"}
 
 
@@ -114,14 +140,42 @@ async def validate_token_and_get_user(token: str, db: Session) -> dict:
 
 # --- HÀM DEPENDENCY MỚI CHO HTTP ---
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_bearer)],
+    request: Request,
     db: db_dependency
 ):
     """
     Đây là dependency CHỈ DÙNG CHO HTTP.
-    Nó tự động lấy token từ header và gọi hàm validate.
+    Nó đọc access token từ HttpOnly cookie thay vì Authorization header.
     """
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     return await validate_token_and_get_user(token, db)
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    """
+    SECURITY: Xóa HttpOnly cookie chứa JWT khi logout để kết thúc phiên đăng nhập.
+    """
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=False,
+        samesite="lax",
+    )
+    response.delete_cookie(
+        key="csrf_token",
+        httponly=False,
+        secure=False,
+        samesite="lax",
+    )
+    return {"message": "Logged out successfully"}
 
 # --- SỬA LẠI ENDPOINT /me ---
 @router.get("/me")

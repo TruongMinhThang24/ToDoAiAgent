@@ -12,7 +12,6 @@ if not API_KEY:
 try:
     # import inside try to get clearer error if package missing or shadowed
     from google import genai
-    from google.genai import types
 except Exception as e:
     print("Import error for google.genai:", e)
     raise

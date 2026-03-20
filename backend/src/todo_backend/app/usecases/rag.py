@@ -3,8 +3,6 @@ import re
 from typing import List
 
 from flashrank import Ranker , RerankRequest
-from langchain_chroma import Chroma
-from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rank_bm25 import BM25Okapi
 

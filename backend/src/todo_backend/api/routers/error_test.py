@@ -19,18 +19,18 @@ def get_db():
     finally:
         db.close()
 
-class TestItem(BaseModel):
+class ErrorTestItem(BaseModel):
     name: str
     value: int = Field(gt=0, description="Value must be greater than zero")
     description: Optional[str] = None
 
 @router.get("/http-error")
-async def test_http_error():
+async def trigger_http_error():
     """Test HTTP exception handling"""
     raise HTTPException(status_code=404, detail="Item not found")
 
 @router.post("/validation-error")
-async def test_validation_error(item: TestItem):
+async def trigger_validation_error(item: ErrorTestItem):
     """
     This endpoint will trigger validation errors if:
     - name is missing
@@ -39,14 +39,14 @@ async def test_validation_error(item: TestItem):
     return {"item": item}
 
 @router.get("/database-error")
-async def test_database_error(db: Session = Depends(get_db)):
+async def trigger_database_error(db: Session = Depends(get_db)):
     """Test database error handling"""
     # Intentionally cause a database error by querying a non-existent table
     db.execute(text("SELECT * FROM non_existent_table"))
     return {"message": "This should never be returned"}
 
 @router.get("/general-error")
-async def test_general_error():
+async def trigger_general_error():
     """Test general exception handling"""
     # Intentionally cause a general exception
     result = 1 / 0  # Division by zero

@@ -3,9 +3,6 @@ import logging
 from todo_backend.domain.entities.models import Todo
 from todo_backend.domain.repositories_interface.notification_repository import \
     NotificationRepository
-from fastapi import (APIRouter, Depends, WebSocket, WebSocketDisconnect,
-                     status, HTTPException)
-from sqlalchemy.orm import Session
 # ...existing code...
 # removed incorrect import that caused ImportError / circular import
 # from .auth import validate_token_and_get_user, get_db

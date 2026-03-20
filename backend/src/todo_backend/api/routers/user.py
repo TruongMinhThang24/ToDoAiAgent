@@ -34,7 +34,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 @router.get("/", response_model=UserResponse)
 async def get_user(user: user_dependency, db: db_dependency):
     if user is None:
-        logger.warning(f" Unauthorized attempt to access user profile")
+        logger.warning(" Unauthorized attempt to access user profile")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     logger.info(f"Fetching user profile for user ID: {user['id']}")
@@ -54,7 +54,7 @@ async def update_user_info(
     update_request: UserUpdateRequest
 ):
     if user is None:
-        logger.warning(f" Unauthorized attempt to update user profile")
+        logger.warning(" Unauthorized attempt to update user profile")
         raise HTTPException(status_code=401, detail="Unauthorized")
     logger.info(f"Updating user profile for user ID: {user['id']}")
     usecase = UserUseCases(UserRepositoryImpl(db))
@@ -80,7 +80,7 @@ async def change_password(
     user_verification: UserVerification
 ):
     if user is None:
-        logger.warning(f" Unauthorized attempt to change password")
+        logger.warning(" Unauthorized attempt to change password")
         raise HTTPException(status_code=401, detail="Unauthorized")
     logger.info(f"Attempting to change password for user ID: {user['id']}")
     usecase = UserUseCases(UserRepositoryImpl(db))

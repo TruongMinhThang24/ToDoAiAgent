@@ -4,7 +4,6 @@ from typing import Optional
 import wave
 from google import genai 
 from google.genai import types
-from fastapi import HTTPException, status
 
 from todo_backend.config.setting import settings
 

@@ -1,8 +1,7 @@
 # backend/src/todo_backend/api/routers/notifications.py
 import logging
-from typing import Annotated
 
-from fastapi import (APIRouter, Depends, WebSocket, WebSocketDisconnect,
+from fastapi import (APIRouter, WebSocket, WebSocketDisconnect,
                      status, HTTPException)
 
 # Import singleton manager

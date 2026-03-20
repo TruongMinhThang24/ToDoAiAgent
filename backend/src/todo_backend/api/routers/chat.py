@@ -5,7 +5,6 @@ import re
 import uuid
 
 import urllib.parse
-from datetime import datetime
 from typing import Any as _Any
 from pydub import AudioSegment
 from typing import Annotated, Any, Dict, List, Optional
@@ -15,28 +14,17 @@ import docx
 from fastapi.responses import StreamingResponse
 from ...infrastructure.agent.gemini_tts_client import GeminiTSSClient
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form , status 
-from langchain_core.messages import (AIMessage, BaseMessage, ChatMessage,
-                                     HumanMessage, SystemMessage, ToolMessage)
-from langchain_core.tools import tool
+from langchain_core.messages import (AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage)
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langgraph.prebuilt import create_react_agent
 from pypdf import PdfReader
 from sqlalchemy.orm import Session
 
 from ...app.usecases.rag import RAGUseCases
-from ...app.usecases.todos import TodoUseCases
 from ...app.usecases.agent_service import AgentService
 from ...infrastructure.agent.dependencies import (get_checkpointer,
                                                   get_gemini_model,
                                                   get_rag_usecase,get_tavily_tool)
-from ...infrastructure.agent.tools import (execute_add_todo,
-                                           execute_delete_todo,
-                                           execute_list_todos,
-                                           execute_toggle_todo_completion,
-                                           execute_update_todo , execute_search_internet,get_tools)
 from ...infrastructure.database.database import sessionLocal
-from ...infrastructure.repositories.todo_repository_impl import \
-    TodoRepositoryImpl
 from ..schemas.chat_schema import (AddDocumentRequest, AgentChatReponse,
                                    ChatRequest)
 from .auth import get_current_user
@@ -123,8 +111,6 @@ async def chat_history(thread_id: str, user: user_dependency, checkpointer: memo
 
     if not thread_id.startswith(f"user_chat_session_{owner_id}_"):
         raise HTTPException(status_code=403, detail="Không có quyền truy cập vào luồng chat này.")
-    
-    config = {"configurable": {"thread_id": thread_id}}
 
     # Try async load() (async saver) then fall back to sync loaders
     checkpoint_data = None
@@ -343,7 +329,7 @@ async def chat_with_voice(
         "audio/x-m4a"    # Alternative M4A
     } # Fix: Add mp3
 
-    logger.info(f"📥 Received voice request:")
+    logger.info("📥 Received voice request:")
     logger.info(f"  - Content-Type: {audio.content_type}")
     logger.info(f"  - Filename: {audio.filename}")
     logger.info(f"  - Size: {audio.size if hasattr(audio, 'size') else 'unknown'}")

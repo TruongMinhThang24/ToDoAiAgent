@@ -2,14 +2,13 @@
 import logging
 from typing import Optional , Any
 import re
-import uuid
 import inspect
 from datetime import datetime
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import HumanMessage, ToolMessage, AIMessage, SystemMessage
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import timedelta
 import pytz
 from todo_backend.config.setting import settings
 from todo_backend.infrastructure.agent.gemini_client import GeminiClient
@@ -212,7 +211,7 @@ class AgentService:
         )
         
         # ✅ LOG để verify
-        logger.info(f"📅 Agent Prompt Context Initialized:")
+        logger.info("📅 Agent Prompt Context Initialized:")
         logger.info(f"  - Current datetime: {now.strftime('%Y-%m-%d %H:%M:%S %A')}")
         logger.info(f"  - Current date: {now.strftime('%Y-%m-%d')}")
         logger.info(f"  - Tomorrow: {tomorrow.strftime('%Y-%m-%d')}")
@@ -283,7 +282,7 @@ class AgentService:
                 ]
             }
             
-            logger.info(f"🤖 Agent config:")
+            logger.info("🤖 Agent config:")
             logger.info(f"  - Model: {self.model.model}")
             logger.info(f"  - Temperature: {self.model.temperature}")
             logger.info(f"  - Tools: {[tool.name for tool in self.agent_executor.tools] if hasattr(self.agent_executor, 'tools') else 'Unknown'}")
@@ -305,7 +304,7 @@ class AgentService:
             last_message = response.get("messages", [])[-1]
             
             # ✅ FIX: Debug log BEFORE parsing
-            logger.info(f"🔍 RAW last_message:")
+            logger.info("🔍 RAW last_message:")
             logger.info(f"  - Type: {type(last_message)}")
             logger.info(f"  - Content type: {type(last_message.content) if hasattr(last_message, 'content') else 'N/A'}")
             logger.info(f"  - Content value: {last_message.content if hasattr(last_message, 'content') else 'N/A'}")
@@ -358,12 +357,12 @@ class AgentService:
             )
             
             # ✅ FIX: Safe logging (tránh None[:100])
-            logger.info(f"📤 Returning response:")
+            logger.info("📤 Returning response:")
             if friendly_message:
                 preview = friendly_message[:100] if len(friendly_message) > 100 else friendly_message
                 logger.info(f"  - friendly_message: {preview}...")
             else:
-                logger.warning(f"  - friendly_message: (None - FALLBACK FAILED!)")
+                logger.warning("  - friendly_message: (None - FALLBACK FAILED!)")
                 friendly_message = "Đã xử lý yêu cầu."  # ✅ Double fallback
             
             logger.info(f"  - needs_clarification: {needs_clarify}")
@@ -436,7 +435,7 @@ class AgentService:
                 friendly_message="Dịch vụ giọng nói tạm thời không khả dụng. Vui lòng thử lại sau.",
                 **base_error_response
             )
-        except Exception as e:
+        except Exception:
             logger.exception(f"Unexpected error in voice command pipeline for thread {thread_id}.")
             return AgentChatReponse(
                 friendly_message="Đã xảy ra lỗi không mong muốn khi xử lý giọng nói.",

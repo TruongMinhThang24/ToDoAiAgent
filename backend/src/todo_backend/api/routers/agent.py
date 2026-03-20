@@ -4,7 +4,7 @@ import uuid
 import logging
 
 from ..schemas.chat_schema import AgentExecuteRequest, AgentChatReponse
-from ..routers.chat import get_agent_service, agent_service_dependency, user_dependency
+from ..routers.chat import agent_service_dependency, user_dependency
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/agent", tags=["Agent"])

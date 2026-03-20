@@ -3,9 +3,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Inbox, Archive, FilePlus, MessageCircle } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useTodos } from '../application/useTodos';
+import { authRepository } from '@/features/auth/login/infrastructure/authRepository';
 
 // Import các components con
 import { TodoNavbar } from './TodoNavbar';
@@ -15,6 +17,7 @@ import { NewTaskForm } from './NewTaskForm';
 import { TodoDetailModal } from './TodoDetailModal';
 
 export default function TodoInbox() {
+  const router = useRouter();
   // 1. Lấy logic từ Hook (Application Layer)
   const { todos, loading, fetchTodos, createNewTodo, removeTodo, toggleTodo, selectedTodo, getTodoDetails, clearSelectedTodo, isLoadingDetail, updateTodoDetails } = useTodos();
   
@@ -35,13 +38,24 @@ export default function TodoInbox() {
     getTodoDetails(id);
   };
 
+  const handleLogout = useCallback(async () => {
+    try {
+      // SECURITY: gọi backend để xóa HttpOnly cookie phiên đăng nhập.
+      await authRepository.logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      router.push('/login');
+    }
+  }, [router]);
+
   const inboxTodos = todos.filter(t => !t.completed);
   const archiveTodos = todos.filter(t => t.completed);
 
   // 4. Render Layout
   return (
     <div className="flex flex-col h-screen w-full bg-white font-sans text-gray-800">
-      <TodoNavbar />
+      <TodoNavbar onLogout={handleLogout} />
 
       {/* Banner */}
       <div className="relative w-full h-48 md:h-64 shrink-0">

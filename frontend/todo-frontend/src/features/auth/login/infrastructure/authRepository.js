@@ -1,9 +1,7 @@
 // src/features/auth/login/infrastructure/authRepository.js
-// Lớp Repository: chịu trách nhiệm lấy dữ liệu (API, localStorage, v.v.)
+// Lớp Repository: chịu trách nhiệm lấy dữ liệu (API)
 
 import apiClient from '@/lib/service/apiClient';
-
-const TOKEN_KEY = 'authToken';
 
 export const authRepository = {
   /**
@@ -33,11 +31,6 @@ export const authRepository = {
         throw new Error('Không nhận được phản hồi hợp lệ từ server.');
       }
 
-      const token = data.access_token || data.token;
-      if (token) {
-        localStorage.setItem(TOKEN_KEY, token);
-      }
-
       return data;
     } catch (err) {
       // Lấy thông điệp lỗi "an toàn" từ server nếu có, ngược lại dùng thông điệp chung
@@ -58,16 +51,19 @@ export const authRepository = {
     }
   },
 
-  logout: () => {
-    localStorage.removeItem(TOKEN_KEY);
+  logout: async () => {
+    // SECURITY: backend sẽ xóa HttpOnly cookie bằng /auth/logout.
+    await apiClient.post('/auth/logout');
   },
 
   getToken: () => {
-    return localStorage.getItem(TOKEN_KEY) || null;
+    // HttpOnly cookie không thể đọc bằng JS.
+    return null;
   },
 
   isAuthenticated: () => {
-    return !!localStorage.getItem(TOKEN_KEY);
+    // Trạng thái xác thực nên được xác minh qua API (/auth/me).
+    return false;
   },
 };
 // ...existing code...

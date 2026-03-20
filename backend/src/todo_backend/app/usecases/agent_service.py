@@ -3,6 +3,7 @@ import logging
 from typing import Optional , Any
 import re
 import uuid
+import inspect
 from datetime import datetime
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
@@ -240,6 +241,18 @@ class AgentService:
         
         logger.info(f"Agent initialized successfully for user {self.user_id} with tools and HITL prompt.")
         return agent_executor
+
+    def _is_async_checkpointer(self) -> bool:
+        """Detect whether the configured checkpointer exposes async methods.
+
+        LangGraph supports both sync and async checkpointers. We switch the
+        invocation path accordingly to avoid event-loop/thread errors.
+        """
+        cp = self.checkpointer
+        if cp is None:
+            return False
+        async_attrs = ("load", "save", "aget", "aset")
+        return any(inspect.iscoroutinefunction(getattr(cp, attr, None)) for attr in async_attrs)
     
     async def run_text_command(self, user_query: str, thread_id: str) -> AgentChatReponse:
         """
@@ -275,9 +288,18 @@ class AgentService:
             logger.info(f"  - Temperature: {self.model.temperature}")
             logger.info(f"  - Tools: {[tool.name for tool in self.agent_executor.tools] if hasattr(self.agent_executor, 'tools') else 'Unknown'}")
             logger.info(f"📤 Agent invoked with query: '{user_query}'")
-            
-            # Use async invocation (ainvoke) to match async-safe checkpointer
-            response = await self.agent_executor.ainvoke(inputs, config=config)
+
+            use_async = self._is_async_checkpointer()
+            logger.info(
+                "🚦 Invocation mode: %s | Checkpointer: %s",
+                "async" if use_async else "sync",
+                self.checkpointer.__class__.__name__ if self.checkpointer else "None",
+            )
+
+            if use_async:
+                response = await self.agent_executor.ainvoke(inputs, config=config)
+            else:
+                response = self.agent_executor.invoke(inputs, config=config)
 
             # --- PARSE RESPONSE ---
             last_message = response.get("messages", [])[-1]
@@ -308,7 +330,7 @@ class AgentService:
                 logger.info(f"HITL detected via CLARIFY (AI): {clarify_prompt}")
             
             # Kiểm tra ToolMessage có CLARIFY
-            elif last_message.tool_calls:
+            elif getattr(last_message, "tool_calls", None):
                 for msg in response["messages"][-3:]:
                     if isinstance(msg, ToolMessage) and "CLARIFY:" in str(msg.content):
                         clarify_prompt = str(msg.content).split("CLARIFY:", 1)[1].strip()

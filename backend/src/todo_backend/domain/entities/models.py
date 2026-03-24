@@ -1,7 +1,9 @@
 #D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\domain\entities\models.py
 import logging
+from datetime import datetime
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, event , DateTime
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Index, Integer,
+                        String, Text, event)
 from todo_backend.infrastructure.database.database import Base
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,38 @@ class Todo(Base):
     completed = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey("users.id"))
     due_date = Column(DateTime, nullable=True)
+
+
+class ChatThread(Base):
+    __tablename__ = "chat_threads"
+
+    # Giữ tương thích với thread_id dạng string hiện có
+    id = Column(String, primary_key=True, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String, nullable=True)
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
+    )
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    thread_id = Column(String, ForeignKey("chat_threads.id"), nullable=False, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    role = Column(String, nullable=False)  # user | assistant | system
+    content = Column(Text, nullable=False)
+    metadata_json = Column("metadata", Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+Index("ix_chat_messages_owner_thread_created", ChatMessage.owner_id, ChatMessage.thread_id, ChatMessage.created_at)
 
 # Sử dụng SQLAlchemy Events để log các sự kiện
 @event.listens_for(Users, "after_insert")

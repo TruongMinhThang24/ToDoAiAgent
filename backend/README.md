@@ -2,11 +2,11 @@
 Huog dan chay: chay moi truong :
  & "C:\Users\thangtm25\AppData\Local\pypoetry\Cache\virtualenvs\todos-list-Aod6zpnz-py3.13\Scripts\Activate.ps1"
 
-poetry run uvicorn api.main:app --reload
+poetry run uvicorn src.main:app --reload
 
 hoach
 poetry shell
-uvicorn api.main:app --reload
+uvicorn src.main:app --reload
 
  fastapi dev backend\todo_backend\api\main.py --reload
 

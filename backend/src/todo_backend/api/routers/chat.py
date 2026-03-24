@@ -13,20 +13,26 @@ import docx
 # checkpointer is now async Postgres-backed; use generic typing
 from fastapi.responses import StreamingResponse
 from ...infrastructure.agent.gemini_tts_client import GeminiTSSClient
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form , status 
-from langchain_core.messages import (AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage)
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, Query,
+                     UploadFile, status)
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pypdf import PdfReader
 from sqlalchemy.orm import Session
 
 from ...app.usecases.rag import RAGUseCases
 from ...app.usecases.agent_service import AgentService
+from ...app.usecases.chat_thread_service import ChatThreadService
 from ...infrastructure.agent.dependencies import (get_checkpointer,
                                                   get_gemini_model,
-                                                  get_rag_usecase,get_tavily_tool)
+                                                  get_optional_tavily_tool,
+                                                  get_rag_usecase)
 from ...infrastructure.database.database import sessionLocal
+from ...infrastructure.repositories.chat_repository_impl import ChatRepositoryImpl
 from ..schemas.chat_schema import (AddDocumentRequest, AgentChatReponse,
-                                   ChatRequest)
+                                   ChatRequest, CreateThreadRequest,
+                                   ThreadListResponse,
+                                   ThreadMessageListResponse,
+                                   ThreadMessageResponse)
 from .auth import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -45,7 +51,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 model_dependency = Annotated[ChatGoogleGenerativeAI , Depends(get_gemini_model)]
 memory_dependency = Annotated[_Any, Depends(get_checkpointer)]
 rag_usecase_dependency = Annotated[RAGUseCases, Depends(get_rag_usecase)]
-tavily_dependency = Annotated[TavilySearch , Depends(get_tavily_tool)]
+tavily_dependency = Annotated[Optional[TavilySearch], Depends(get_optional_tavily_tool)]
 def get_agent_service(
     db: db_dependency,
     user: user_dependency,  
@@ -62,17 +68,39 @@ def get_agent_service(
 
 agent_service_dependency = Annotated[AgentService, Depends(get_agent_service)]
 
+
+def get_chat_thread_service(
+    db: db_dependency,
+    user: user_dependency,
+) -> ChatThreadService:
+    repo = ChatRepositoryImpl(db)
+    return ChatThreadService(repo=repo, owner_id=user["id"])
+
+
+chat_thread_service_dependency = Annotated[ChatThreadService, Depends(get_chat_thread_service)]
+
+
+def _sanitize_message(message: str) -> str:
+    cleaned = (message or "").strip()
+    if not cleaned:
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
+    if len(cleaned) > 4000:
+        raise HTTPException(status_code=400, detail="Message too long (max 4000 chars)")
+    return cleaned
+
 @router.post("/", response_model=AgentChatReponse)
 async def chat_with_agent(
     request: ChatRequest,
     user: user_dependency,
-    agent_service: agent_service_dependency  # ✅ Inject AgentService
+    agent_service: agent_service_dependency,  # ✅ Inject AgentService
+    thread_service: chat_thread_service_dependency,
 ):
     """
     ✅ FIXED: Dùng AgentService thay vì tạo agent mới
     Loại bỏ duplicate AGENT_PROMPT
     """
     owner_id = user["id"]
+    user_message = _sanitize_message(request.message)
     client_thread_id = request.thread_id
     thread_id_to_use: str
 
@@ -81,18 +109,28 @@ async def chat_with_agent(
         if not client_thread_id.startswith(f"user_chat_session_{owner_id}_"):
             raise HTTPException(status_code=403, detail="Không có quyền truy cập")
         thread_id_to_use = client_thread_id
+        thread_service.ensure_thread(thread_id_to_use)
         logger.info(f"Continue chat for {owner_id} on {thread_id_to_use}")
     else:
         new_uuid = str(uuid.uuid4())
         thread_id_to_use = f"user_chat_session_{owner_id}_{new_uuid}"
+        thread_service.create_thread(thread_id_to_use, title=None)
         logger.info(f"Create NEW chat for user {owner_id} on thread {thread_id_to_use}")
+
+    thread_service.add_message(thread_id=thread_id_to_use, role="user", content=user_message)
     
     # ✅ Gọi AgentService (đã có prompt mới)
     try:
         agent_response = await agent_service.run_text_command(
-            user_query=request.message,
+            user_query=user_message,
             thread_id=thread_id_to_use
         )
+        if agent_response.friendly_message:
+            thread_service.add_message(
+                thread_id=thread_id_to_use,
+                role="assistant",
+                content=str(agent_response.friendly_message),
+            )
         return agent_response
     
     except Exception as e:
@@ -104,78 +142,96 @@ async def chat_with_agent(
             clarification_prompt=None
         )
 
+
+@router.get("/threads", response_model=ThreadListResponse)
+async def list_threads(
+    user: user_dependency,
+    thread_service: chat_thread_service_dependency,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+):
+    items, total = thread_service.list_threads(limit=limit, offset=offset)
+    return {
+        "items": items,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
+
+
+@router.post("/threads", status_code=201)
+async def create_thread(
+    request: CreateThreadRequest,
+    user: user_dependency,
+    thread_service: chat_thread_service_dependency,
+):
+    owner_id = user["id"]
+    thread_id = f"user_chat_session_{owner_id}_{uuid.uuid4()}"
+    thread = thread_service.create_thread(thread_id=thread_id, title=request.title)
+    return {
+        "thread_id": thread.id,
+        "title": thread.title,
+        "created_at": thread.created_at,
+        "updated_at": thread.updated_at,
+    }
+
+
+@router.get("/threads/{thread_id}/messages", response_model=ThreadMessageListResponse)
+async def get_thread_messages(
+    thread_id: str,
+    user: user_dependency,
+    thread_service: chat_thread_service_dependency,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+):
+    owner_id = user["id"]
+    if not thread_id.startswith(f"user_chat_session_{owner_id}_"):
+        raise HTTPException(status_code=403, detail="Không có quyền truy cập vào luồng chat này.")
+
+    messages = thread_service.list_messages(thread_id=thread_id, limit=limit, offset=offset)
+    items = [
+        ThreadMessageResponse(
+            id=msg.id,
+            role=msg.role,
+            content=msg.content,
+            created_at=msg.created_at,
+        )
+        for msg in messages
+    ]
+    return {
+        "thread_id": thread_id,
+        "items": items,
+        "limit": limit,
+        "offset": offset,
+    }
+
+
+@router.delete("/threads/{thread_id}", status_code=204)
+async def delete_thread(
+    thread_id: str,
+    user: user_dependency,
+    thread_service: chat_thread_service_dependency,
+):
+    owner_id = user["id"]
+    if not thread_id.startswith(f"user_chat_session_{owner_id}_"):
+        raise HTTPException(status_code=403, detail="Không có quyền truy cập vào luồng chat này.")
+    thread_service.delete_thread(thread_id=thread_id)
+    return None
+
 @router.get("/history_chat/{thread_id}", response_model=List[Dict[str, Any]])
-async def chat_history(thread_id: str, user: user_dependency, checkpointer: memory_dependency):
-    " Truy xuất lịch sử tin nhắn SẠCH SẼ (chỉ user và AI) cho người dùng hiện tại"
+async def chat_history(
+    thread_id: str,
+    user: user_dependency,
+    thread_service: chat_thread_service_dependency,
+):
+    """Legacy endpoint: trả lịch sử chat từ bảng persisted messages."""
     owner_id = user["id"]
 
     if not thread_id.startswith(f"user_chat_session_{owner_id}_"):
         raise HTTPException(status_code=403, detail="Không có quyền truy cập vào luồng chat này.")
 
-    # Try async load() (async saver) then fall back to sync loaders
-    checkpoint_data = None
-    try:
-        if hasattr(checkpointer, 'load'):
-            checkpoint_data = await checkpointer.load(thread_id)
-        elif hasattr(checkpointer, 'load_sync'):
-            checkpoint_data = checkpointer.load_sync(thread_id)
-    except Exception as e:
-        logger.error(f"Error loading checkpoint for {thread_id}: {e}", exc_info=True)
-
-    if not checkpoint_data:
-        logger.warning(f"Không tìm thấy lịch sử cho thread {thread_id}")
-        return []
-
-    # Support different checkpoint formats: prefer channel_values.messages, or messages
-    current_state_data = checkpoint_data.get("channel_values") if isinstance(checkpoint_data, dict) and checkpoint_data.get("channel_values") else checkpoint_data
-    messages_list: List[BaseMessage] = []
-    if isinstance(current_state_data, dict):
-        messages_list = current_state_data.get("messages", [])
-    elif isinstance(checkpoint_data, dict) and checkpoint_data.get("messages"):
-        messages_list = checkpoint_data.get("messages")
-    
-    if not messages_list:
-        logger.warning(f"Tìm thấy checkpoint cho {thread_id} nhưng không có tin nhắn.")
-        return []
-
-    serializable_messages = []
-
-    for msg in messages_list:
-        
-        if isinstance(msg, HumanMessage):
-            serializable_messages.append({
-                "role": "user",
-                "content": str(msg.content)
-            })
-        
-        # 2. Nếu là tin nhắn của AI...
-        elif isinstance(msg, AIMessage):
-            final_ai_content = ""
-            if isinstance(msg.content, list) and msg.content:
-                final_ai_content = msg.content[0].get("text") 
-            else:
-                final_ai_content = str(msg.content)
-           
-            if not msg.tool_calls:
-               
-                if final_ai_content.strip():
-                    serializable_messages.append({
-                        "role": "assistant",
-                        "content": final_ai_content
-                    })
-        
-        # 3. Bỏ qua tất cả các ToolMessage
-        elif isinstance(msg, ToolMessage):
-            pass
-
-        # 4. (Tùy chọn) Xử lý các loại tin nhắn khác nếu cần
-        elif isinstance(msg, SystemMessage):
-             serializable_messages.append({
-                "role": "system",
-                "content": str(msg.content)
-            })
-
-    return serializable_messages
+    messages = thread_service.list_messages(thread_id=thread_id, limit=200, offset=0)
+    return [{"role": m.role, "content": m.content} for m in messages]
 
 @router.post("/knowledge", status_code=201)
 async def add_document(

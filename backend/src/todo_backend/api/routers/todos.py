@@ -1,11 +1,15 @@
 #D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\api\routers\todos.py
 import logging
-from typing import Annotated, Optional
+from typing import Annotated, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlalchemy.orm import Session
 
-from todo_backend.api.schemas.todos_schema import TodoRequest, TodoResponse
+from todo_backend.api.schemas.todos_schema import (
+    TodoListResponse,
+    TodoRequest,
+    TodoResponse,
+)
 from todo_backend.app.usecases.todos import TodoUseCases
 from todo_backend.infrastructure.database.database import sessionLocal
 from todo_backend.infrastructure.repositories.todo_repository_impl import \
@@ -52,17 +56,55 @@ async def create_todo(
     return todo
     
 
-@router.get("/", response_model=list[TodoResponse])
-async def get_all_todos(user: user_dependency, db: db_dependency):
+@router.get("/", response_model=TodoListResponse)
+async def get_all_todos(
+    user: user_dependency,
+    db: db_dependency,
+    q: Optional[str] = Query(default=None),
+    status_filter: Literal["all", "active", "completed", "overdue"] = Query(
+        default="all",
+        alias="status"
+    ),
+    view: Literal["all", "inbox", "archived"] = Query(default="all"),
+    sort_by: Literal["created_at", "due_date", "priority"] = Query(default="created_at"),
+    sort_order: Literal["asc", "desc"] = Query(default="desc"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+):
     if user is None:
         logger.warning("Unauthorized access attempt to fetch all TODOs")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    logger.info(f"Fetching all TODOs for user ID: {user['id']}")
+    logger.info(
+        "Fetching TODO list for user ID=%s with q=%s, status=%s, view=%s, sort_by=%s, sort_order=%s, page=%s, page_size=%s",
+        user["id"],
+        q,
+        status_filter,
+        view,
+        sort_by,
+        sort_order,
+        page,
+        page_size,
+    )
+
     usecase = TodoUseCases(TodoRepositoryImpl(db))
-    todos = usecase.get_all_todos(owner_id=user["id"])
-    logger.info(f"Fetched {len(todos)} TODOs for user ID: {user['id']}")
-    return todos
+    items, total = usecase.query_todos(
+        owner_id=user["id"],
+        q=q,
+        status=status_filter,
+        view=view,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        page_size=page_size,
+    )
+    logger.info(f"Fetched {len(items)} TODOs (total={total}) for user ID: {user['id']}")
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
 
 
 @router.get("/{todo_id}", response_model=TodoResponse)

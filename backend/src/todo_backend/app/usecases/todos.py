@@ -1,7 +1,8 @@
 #D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\app\usecases\todos.py
 import logging
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+
 from todo_backend.domain.entities.models import Todo
 from todo_backend.domain.repositories_interface.todo_repository import \
     TodoRepository
@@ -68,3 +69,92 @@ class TodoUseCases:
         todos = self.todo_repository.search(owner_id, title, completed)
         logger.info(f"Found {len(todos)} TODOs matching search criteria for owner ID: {owner_id}")
         return todos
+
+    def query_todos(
+        self,
+        owner_id: int,
+        q: Optional[str],
+        status: str,
+        view: str,
+        sort_by: str,
+        sort_order: str,
+        page: int,
+        page_size: int,
+    ) -> tuple[List[Todo], int]:
+        logger.info(
+            "Querying todos for owner_id=%s with q=%s, status=%s, view=%s, sort_by=%s, sort_order=%s, page=%s, page_size=%s",
+            owner_id,
+            q,
+            status,
+            view,
+            sort_by,
+            sort_order,
+            page,
+            page_size,
+        )
+
+        todos = self.todo_repository.get_all_by_owner(owner_id)
+
+        # Search (case-insensitive, title + description)
+        if q:
+            keyword = q.strip().lower()
+            if keyword:
+                todos = [
+                    todo for todo in todos
+                    if keyword in (todo.title or "").lower()
+                    or keyword in (todo.description or "").lower()
+                ]
+
+        # View filter
+        if view == "inbox":
+            todos = [todo for todo in todos if not todo.completed]
+        elif view == "archived":
+            todos = [todo for todo in todos if todo.completed]
+
+        # Status filter
+        now = datetime.now()
+        if status == "active":
+            todos = [todo for todo in todos if not todo.completed]
+        elif status == "completed":
+            todos = [todo for todo in todos if todo.completed]
+        elif status == "overdue":
+            todos = [
+                todo
+                for todo in todos
+                if (not todo.completed) and (todo.due_date is not None) and (todo.due_date < now)
+            ]
+
+        # Sort
+        reverse = sort_order == "desc"
+        if sort_by == "due_date":
+            if reverse:
+                # Due date DESC: farthest due date first, None last
+                todos.sort(
+                    key=lambda todo: (
+                        todo.due_date is None,
+                        -(todo.due_date.timestamp()) if todo.due_date else float("inf"),
+                    )
+                )
+            else:
+                # Due date ASC: nearest due date first, None last
+                todos.sort(
+                    key=lambda todo: (
+                        todo.due_date is None,
+                        todo.due_date.timestamp() if todo.due_date else float("inf"),
+                    )
+                )
+        elif sort_by == "priority":
+            todos.sort(key=lambda todo: todo.priority or 0, reverse=reverse)
+        else:
+            # created_at replacement by id (newer id = newer todo)
+            todos.sort(key=lambda todo: todo.id or 0, reverse=reverse)
+
+        total = len(todos)
+
+        # Pagination
+        start = (page - 1) * page_size
+        end = start + page_size
+        items = todos[start:end]
+
+        logger.info("Query result for owner_id=%s: total=%s, returned=%s", owner_id, total, len(items))
+        return items, total

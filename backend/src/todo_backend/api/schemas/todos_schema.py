@@ -22,3 +22,10 @@ class TodoResponse(BaseModel):
 
     class Config:
             from_attributes = True
+
+
+class TodoListResponse(BaseModel):
+    items: list[TodoResponse]
+    total: int
+    page: int
+    page_size: int

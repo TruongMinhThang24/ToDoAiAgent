@@ -123,6 +123,25 @@ class AsyncPostgresSaver:
     def load_sync(self, thread_id: str) -> Optional[dict]:
         return asyncio.get_event_loop().run_until_complete(self.load(thread_id))
 
+
+class InMemoryCheckpointer:
+    """Fallback checkpointer để tránh làm hỏng toàn bộ chat khi DB async không khả dụng."""
+
+    def __init__(self):
+        self._store: dict[str, dict] = {}
+
+    async def save(self, thread_id: str, checkpoint: dict) -> None:
+        self._store[thread_id] = checkpoint
+
+    async def load(self, thread_id: str) -> Optional[dict]:
+        return self._store.get(thread_id)
+
+    def save_sync(self, thread_id: str, checkpoint: dict) -> None:
+        self._store[thread_id] = checkpoint
+
+    def load_sync(self, thread_id: str) -> Optional[dict]:
+        return self._store.get(thread_id)
+
 try:
     async_engine = create_async_engine(async_db_url, echo=False)
     app_checkpointer = AsyncPostgresSaver(async_engine)
@@ -134,7 +153,8 @@ try:
         pass
 except Exception as e:
     logger.error(f"Failed to create async engine for checkpointer: {e}")
-    app_checkpointer = None
+    app_checkpointer = InMemoryCheckpointer()
+    logger.warning("Using InMemoryCheckpointer fallback.")
 
 def get_gemini_model():
     """Dependency để cung cấp mô hình LLM."""
@@ -151,8 +171,8 @@ def get_rag_usecase():
 def get_checkpointer():
     """Dependency để cung cấp bộ nhớ (memory)."""
     if app_checkpointer is None:
-        logger.error("Checkpointer is not configured.")
-        raise HTTPException(status_code=500, detail="Checkpointer not configured")
+        logger.warning("Checkpointer unavailable; using in-memory fallback at runtime.")
+        return InMemoryCheckpointer()
     return app_checkpointer
 # === REFACTORED DEPENDENCY ===
 def get_tavily_tool() -> TavilySearch:
@@ -166,4 +186,12 @@ def get_tavily_tool() -> TavilySearch:
             status_code=503, 
             detail="Internet search service is not configured or unavailable."
         )
+    return app_tavily_tool
+
+
+def get_optional_tavily_tool() -> TavilySearch | None:
+    """Optional dependency: trả None khi Tavily chưa cấu hình, không làm fail chat endpoint."""
+    if app_tavily_tool is None:
+        logger.warning("Tavily tool is unavailable; continue without internet-search tool.")
+        return None
     return app_tavily_tool

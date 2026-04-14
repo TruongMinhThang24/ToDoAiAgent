@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from typing import Annotated
 import uuid
 import logging
@@ -14,6 +14,7 @@ async def execute_agent(
     request: AgentExecuteRequest,
     user: Annotated[dict, Depends(user_dependency)],
     agent_service = Depends(agent_service_dependency),
+    x_gemini_api_key: str | None = Header(default=None, alias="X-Gemini-API-Key"),
 ):
     owner_id = user["id"]
     # Build/validate thread id
@@ -22,7 +23,11 @@ async def execute_agent(
 
     try:
         # For now use user_prompt as the text to send to agent
-        agent_response = await agent_service.run_text_command(user_query=request.user_prompt, thread_id=thread_id)
+        agent_response = await agent_service.run_text_command(
+            user_query=request.user_prompt,
+            thread_id=thread_id,
+            custom_api_key=x_gemini_api_key,
+        )
         return agent_response
     except Exception as e:
         logger.error(f"Error executing agent: {e}", exc_info=True)

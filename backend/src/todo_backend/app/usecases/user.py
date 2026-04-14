@@ -3,6 +3,7 @@ import logging
 from typing import Optional
 
 from passlib.context import CryptContext
+from passlib.exc import UnknownHashError
 
 from todo_backend.domain.entities.models import Users
 from todo_backend.domain.repositories_interface.user_repository import \
@@ -13,7 +14,13 @@ logger = logging.getLogger(__name__)
 class UserUseCases:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
-        self.bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self.password_context = CryptContext(
+            schemes=["argon2", "bcrypt"],
+            deprecated=["bcrypt"],
+            argon2__rounds=4,
+            argon2__memory_cost=65536,
+            argon2__parallelism=4,
+        )
 
     def get_user(self, user_id: int) -> Optional[Users]:
         logger.info(f"Fetching user with ID: {user_id}")
@@ -41,10 +48,17 @@ class UserUseCases:
         if not user:
             logger.warning(f"User with ID {user_id} not found")
             return False
-        if not self.bcrypt_context.verify(old_password, user.hashed_password):
+        try:
+            is_valid_old_password = self.password_context.verify(old_password, user.hashed_password)
+        except UnknownHashError:
+            logger.warning(f"Stored password hash format not recognized for user ID: {user_id}")
+            return False
+
+        if not is_valid_old_password:
             logger.warning(f"Old password verification failed for user ID: {user_id}")
             return False
-        hashed = self.bcrypt_context.hash(new_password)
+
+        hashed = self.password_context.hash(new_password)
         self.user_repository.update_password(user_id, hashed)
         logger.info(f"Password changed successfully for user ID: {user_id}")
         return True

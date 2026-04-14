@@ -30,7 +30,7 @@ class ChatRepositoryImpl(ChatRepository):
             .filter(
                 ChatThread.id == thread_id,
                 ChatThread.owner_id == owner_id,
-                ChatThread.is_deleted.is_(False),
+                ChatThread.is_deleted == False,
             )
             .first()
         )
@@ -38,7 +38,7 @@ class ChatRepositoryImpl(ChatRepository):
     def list_threads(self, owner_id: int, limit: int, offset: int) -> Tuple[List[Dict], int]:
         base_query = (
             self.db.query(ChatThread)
-            .filter(ChatThread.owner_id == owner_id, ChatThread.is_deleted.is_(False))
+            .filter(ChatThread.owner_id == owner_id, ChatThread.is_deleted == False)
             .order_by(ChatThread.updated_at.desc())
         )
 

@@ -9,6 +9,7 @@ from todo_backend.api.schemas.todos_schema import (
     TodoListResponse,
     TodoRequest,
     TodoResponse,
+    TodoUpdateRequest,
 )
 from todo_backend.app.usecases.todos import TodoUseCases
 from todo_backend.infrastructure.database.database import sessionLocal
@@ -49,8 +50,12 @@ async def create_todo(
         description=todo_request.description,
         priority=todo_request.priority,
         owner_id=user["id"],
-        
-        due_date=todo_request.due_date
+        completed=todo_request.completed,
+        due_date=todo_request.due_date,
+        status=todo_request.status,
+        thumbnail_url=todo_request.thumbnail_url,
+        is_vital=todo_request.is_vital,
+        checklist_data=todo_request.checklist_data,
     )
     logger.info(f"TODO created successfully with ID: {todo.id}")
     return todo
@@ -65,26 +70,33 @@ async def get_all_todos(
         default="all",
         alias="status"
     ),
+    workflow_status: Optional[Literal["not_started", "in_progress", "completed"]] = Query(
+        default=None,
+        alias="workflow_status",
+    ),
     view: Literal["all", "inbox", "archived"] = Query(default="all"),
     sort_by: Literal["created_at", "due_date", "priority"] = Query(default="created_at"),
     sort_order: Literal["asc", "desc"] = Query(default="desc"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
+    is_vital: Optional[bool] = Query(default=None),
 ):
     if user is None:
         logger.warning("Unauthorized access attempt to fetch all TODOs")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     logger.info(
-        "Fetching TODO list for user ID=%s with q=%s, status=%s, view=%s, sort_by=%s, sort_order=%s, page=%s, page_size=%s",
+        "Fetching TODO list for user ID=%s with q=%s, status=%s, workflow_status=%s, view=%s, sort_by=%s, sort_order=%s, page=%s, page_size=%s, is_vital=%s",
         user["id"],
         q,
         status_filter,
+        workflow_status,
         view,
         sort_by,
         sort_order,
         page,
         page_size,
+        is_vital,
     )
 
     usecase = TodoUseCases(TodoRepositoryImpl(db))
@@ -92,11 +104,13 @@ async def get_all_todos(
         owner_id=user["id"],
         q=q,
         status=status_filter,
+        workflow_status=workflow_status,
         view=view,
         sort_by=sort_by,
         sort_order=sort_order,
         page=page,
         page_size=page_size,
+        is_vital=is_vital,
     )
     logger.info(f"Fetched {len(items)} TODOs (total={total}) for user ID: {user['id']}")
     return {
@@ -132,7 +146,7 @@ async def update_todo(
     user: user_dependency,
     db: db_dependency,
     todo_id: int = Path(gt=0),
-    todo_request: TodoRequest = Depends()
+    todo_request: TodoUpdateRequest = ...
 ):
     if user is None:
         logger.warning("Unauthorized access attempt to update a TODO")
@@ -140,15 +154,22 @@ async def update_todo(
 
     logger.info(f"Updating TODO with ID: {todo_id} for user ID: {user['id']}")
     usecase = TodoUseCases(TodoRepositoryImpl(db))
-    usecase.update_todo(
+    updated = usecase.update_todo(
         todo_id=todo_id,
         owner_id=user["id"],
         title=todo_request.title,
         description=todo_request.description,
         priority=todo_request.priority,
         completed=todo_request.completed,
-        due_date=todo_request.due_date
+        due_date=todo_request.due_date,
+        status=todo_request.status,
+        thumbnail_url=todo_request.thumbnail_url,
+        is_vital=todo_request.is_vital,
+        checklist_data=todo_request.checklist_data,
     )
+    if not updated:
+        logger.warning(f"TODO with ID {todo_id} not found for user ID: {user['id']}")
+        raise HTTPException(status_code=404, detail="Todo not found")
     logger.info(f"TODO with ID {todo_id} updated successfully for user ID: {user['id']}")
 
 

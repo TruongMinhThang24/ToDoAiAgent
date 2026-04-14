@@ -1,11 +1,9 @@
-// src/app/page.jsx
-// Trang chủ, chuyển hướng người dùng đến trang đăng nhập
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
-export default function HomePage() {
-  // Mặc định chuyển hướng đến trang /login
-  redirect('/login');
-  
-  // Trả về null hoặc một loading spinner nếu cần
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const hasAccessToken = Boolean(cookieStore.get('access_token')?.value);
+  redirect(hasAccessToken ? '/dashboard' : '/login');
   return null;
 }

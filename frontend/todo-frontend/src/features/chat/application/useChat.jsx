@@ -4,16 +4,18 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { ChatMessage } from '@/features/chat/entities/ChatMessage';
 import { chatRepository } from '@/features/chat/infrastructure/chatRepository';
 
+const THREAD_STORAGE_KEY = 'todo_chat_current_thread_id';
+const DEFAULT_ASSISTANT_MESSAGE = ChatMessage.createAssistantMessage(
+  'Xin chào! Tôi là trợ lý AI. Hãy hỏi tôi hoặc ghi âm.'
+);
+
 export const useChat = () => {
   // State
-  const [messages, setMessages] = useState([
-    ChatMessage.createAssistantMessage(
-      'Xin chào! Tôi là trợ lý AI. Hãy hỏi tôi hoặc ghi âm.'
-    ),
-  ]);
+  const [messages, setMessages] = useState([DEFAULT_ASSISTANT_MESSAGE]);
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
-  const [chatHistory, setChatHistory] = useState([]);
+  const [threads, setThreads] = useState([]);
+  const [isLoadingThreads, setIsLoadingThreads] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [currentThreadId, setCurrentThreadId] = useState(null);
   const [recordedAudio, setRecordedAudio] = useState(null);
@@ -22,18 +24,91 @@ export const useChat = () => {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  // Load chat history
-  useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const history = await chatRepository.getChatHistory();
-        setChatHistory(history);
-      } catch (error) {
-        console.error('Error loading chat history:', error);
-      }
-    };
-    loadHistory();
+  const toUiMessages = useCallback((items = []) => {
+    if (!items.length) {
+      return [DEFAULT_ASSISTANT_MESSAGE];
+    }
+
+    return items.map((item) =>
+      new ChatMessage({
+        id: `db-${item.id}`,
+        role: item.role === 'assistant' ? 'assistant' : 'user',
+        content: item.content || '',
+        timestamp: new Date(item.created_at || Date.now()),
+        type: 'text',
+      })
+    );
   }, []);
+
+  const loadThreads = useCallback(async () => {
+    setIsLoadingThreads(true);
+    try {
+      const response = await chatRepository.getThreads();
+      setThreads(response.items || []);
+      return response.items || [];
+    } catch (error) {
+      console.error('Error loading chat threads:', error);
+      setThreads([]);
+      return [];
+    } finally {
+      setIsLoadingThreads(false);
+    }
+  }, []);
+
+  const loadThreadMessages = useCallback(
+    async (threadId) => {
+      if (!threadId) {
+        setMessages([DEFAULT_ASSISTANT_MESSAGE]);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await chatRepository.getThreadMessages(threadId);
+        setMessages(toUiMessages(response.items || []));
+      } catch (error) {
+        console.error('Error loading thread messages:', error);
+        setMessages([
+          ChatMessage.createAssistantMessage(
+            'Không thể tải lịch sử hội thoại. Vui lòng thử lại.'
+          ),
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [toUiMessages]
+  );
+
+  useEffect(() => {
+    const bootstrap = async () => {
+      const savedThreadId =
+        typeof window !== 'undefined'
+          ? window.localStorage.getItem(THREAD_STORAGE_KEY)
+          : null;
+
+      const items = await loadThreads();
+
+      const selectedThreadId =
+        savedThreadId && items.find((item) => item.thread_id === savedThreadId)
+          ? savedThreadId
+          : items[0]?.thread_id || null;
+
+      setCurrentThreadId(selectedThreadId);
+      await loadThreadMessages(selectedThreadId);
+    };
+
+    bootstrap();
+  }, [loadThreads, loadThreadMessages]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (currentThreadId) {
+      window.localStorage.setItem(THREAD_STORAGE_KEY, currentThreadId);
+    } else {
+      window.localStorage.removeItem(THREAD_STORAGE_KEY);
+    }
+  }, [currentThreadId]);
 
   // ✅ FIX: Cleanup chỉ khi component UNMOUNT (không phụ thuộc messages)
   useEffect(() => {
@@ -86,6 +161,7 @@ export const useChat = () => {
       
       // ✅ Cập nhật thread_id
       setCurrentThreadId(aiResponse.thread_id);
+      await loadThreads();
 
       // ✅ XỬ LÝ CLARIFICATION: Luôn hiển thị friendly_message
       const assistantMessage = ChatMessage.createAssistantMessage(
@@ -109,7 +185,49 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentThreadId]);
+  }, [currentThreadId, loadThreads]);
+
+  const createNewThread = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const newThread = await chatRepository.createThread();
+      setCurrentThreadId(newThread.thread_id);
+      setMessages([DEFAULT_ASSISTANT_MESSAGE]);
+      await loadThreads();
+    } catch (error) {
+      console.error('Error creating new thread:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadThreads]);
+
+  const selectThread = useCallback(
+    async (threadId) => {
+      if (!threadId || threadId === currentThreadId) return;
+      setCurrentThreadId(threadId);
+      await loadThreadMessages(threadId);
+    },
+    [currentThreadId, loadThreadMessages]
+  );
+
+  const deleteThread = useCallback(
+    async (threadId) => {
+      if (!threadId) return;
+      try {
+        await chatRepository.deleteThread(threadId);
+        const updatedThreads = await loadThreads();
+
+        if (currentThreadId === threadId) {
+          const nextThreadId = updatedThreads[0]?.thread_id || null;
+          setCurrentThreadId(nextThreadId);
+          await loadThreadMessages(nextThreadId);
+        }
+      } catch (error) {
+        console.error('Error deleting thread:', error);
+      }
+    },
+    [currentThreadId, loadThreadMessages, loadThreads]
+  );
 
   // Start recording
   const startRecording = useCallback(async () => {
@@ -290,12 +408,18 @@ export const useChat = () => {
     messages,
     isLoading,
     sidebarVisible,
-    chatHistory,
+    chatHistory: threads,
+    threads,
+    isLoadingThreads,
     isRecording,
     recordedAudio,
+    currentThreadId,
     sendMessage,
     handleVoice,
     sendVoiceMessage,
     toggleSidebar,
+    createNewThread,
+    selectThread,
+    deleteThread,
   };
 };

@@ -18,14 +18,18 @@ Bạn là một Senior AI Software Engineer. Khi tôi giao cho bạn một file 
 2. Đảm bảo tuân thủ nguyên tắc Clean Architecture (đối với Backend) và Feature-Driven (đối với Frontend).
 3. Code phải bao gồm comment giải thích logic.
 
-## Phase 3: Kiểm Thử (VERIFY)
+## Phase 3: Kiểm Thử (VERIFY) & Tự Động Hóa E2E
 1. Tuyệt đối không tự cho rằng code của mình là đúng.
-2. **TẠO TÀI LIỆU TEST BẮT BUỘC:** Bạn PHẢI tạo (hoặc cập nhật) file `docs/TESTING_GUIDE.md` (bằng cách xuất ra Markdown Code Block để tôi bấm Apply). 
-3. Trong file `TESTING_GUIDE.md` này, bạn phải viết rõ kịch bản test cho Task vừa làm, bao gồm:
-   - **Automated Tests:** Các câu lệnh Terminal cần chạy (ví dụ: `pytest`, `npm run build`, `npm run lint`).
-   - **Manual Tests:** Các bước test bằng tay chi tiết (Ví dụ: "Bước 1: Mở trình duyệt vào /login. Bước 2: Nhập tài khoản... Bước 3: F12 mở tab Network kiểm tra Cookie...").
-4. Đợi tôi làm theo tài liệu Test đó. Nếu tôi gửi lại log lỗi (màu đỏ) hoặc báo lỗi UI, bạn phải tự động phân tích, quay lại Phase 2 sửa code, và yêu cầu test lại.
-5. Nếu tôi gửi log màu xanh hoặc báo "Test Passed", bạn mới được chuyển sang Phase 4.
+2. **CẬP NHẬT TÀI LIỆU TEST:** Bạn PHẢI xuất Code Block cập nhật file `docs/TESTING_GUIDE.md` chứa các câu lệnh Unit Test Backend (`pytest`) và Frontend (`npm run lint`, `npm run build`).
+3. **TẠO SCRIPT PLAYWRIGHT E2E (BẮT BUỘC):** Thay vì viết các bước test bằng tay (Manual), bạn BẮT BUỘC phải tự động viết một file test E2E bằng Python Playwright (Ví dụ: `backend/tests/e2e_task_xx.py`) cho tính năng vừa làm.
+4. **TIÊU CHUẨN CODE PLAYWRIGHT:** - Tuân thủ cấu trúc của file chuẩn `run_e2e_test.py` hiện có trong dự án.
+   - **Bypass UI Login:** Không test UI đăng nhập. Bắt buộc gọi API `/auth/register` và `/auth/token` để tạo user động (random) và lấy JWT + CSRF Cookie, sau đó inject vào `browser.new_context()`.
+   - **Dữ liệu động:** Các dữ liệu text (title, mô tả) phải được sinh ngẫu nhiên (random) để tránh trùng lặp Database khi chạy nhiều lần.
+   - **Explicit Waits:** TUYỆT ĐỐI KHÔNG dùng `time.sleep()`. Phải dùng `wait_for(state="visible")` hoặc `page.wait_for_url()`.
+   - Đóng gói chuẩn: Sử dụng `async_playwright()`, có khối `try...finally` để đảm bảo luôn đóng browser.
+5. In ra màn hình câu lệnh để tôi chạy file E2E đó (VD: `poetry run python tests/e2e_task_xx.py`). Đợi tôi chạy.
+6. Nếu tôi gửi lại log lỗi (màu đỏ), bạn phải tự động phân tích lỗi (do Test sai hay do Code sai), quay lại sửa, và yêu cầu chạy lại.
+7. Nếu log xanh 100%, mới được chuyển sang Phase 4.
 
 ## Phase 4: Báo Cáo & Đóng Gói (DOCUMENT)
 CHỈ KHI tôi xác nhận code đã pass (màu xanh), bạn mới thực hiện các bước sau:

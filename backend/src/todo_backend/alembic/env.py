@@ -1,18 +1,33 @@
-
 import os
 import sys
+from pathlib import Path
 
-# Thêm dường dẫn của thư mục cha (root) của dự án
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add backend/src into sys.path so `todo_backend` package can be imported reliably.
+CURRENT_FILE = Path(__file__).resolve()
+SRC_PATH = CURRENT_FILE.parents[2]
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 from logging.config import fileConfig
 
 from alembic import context
-from domain.entities import models
+from todo_backend.domain.entities import models
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+
+def _normalize_database_url(database_url: str) -> str:
+    if database_url.startswith("mssql://"):
+        return database_url.replace("mssql://", "mssql+pyodbc://", 1)
+    return database_url
+
+
+# Prefer DATABASE_URL from environment for deployment/multi-env usage.
+database_url = os.getenv("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+if database_url:
+    config.set_main_option("sqlalchemy.url", _normalize_database_url(database_url))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -49,6 +64,9 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,
+        compare_server_default=True,
+        render_as_batch=url.startswith("sqlite"),
     )
 
     with context.begin_transaction():
@@ -70,7 +88,11 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
+            compare_server_default=True,
+            render_as_batch=config.get_main_option("sqlalchemy.url").startswith("sqlite"),
         )
 
         with context.begin_transaction():

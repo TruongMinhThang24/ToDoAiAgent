@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "task07-e2e",
+			"type": "shell",
+			"command": "poetry",
+			"args": [
+				"run",
+				"python",
+				"tests/e2e_task07_add_task_contract.py"
+			],
+			"isBackground": false
+		}
+	]
+}

@@ -4,6 +4,7 @@ import asyncio
 from typing import Optional
 
 from flashrank import Ranker
+from langgraph.checkpoint.memory import MemorySaver
 from langchain_google_genai import (ChatGoogleGenerativeAI,
                                     GoogleGenerativeAIEmbeddings)
 from fastapi import HTTPException
@@ -124,24 +125,6 @@ class AsyncPostgresSaver:
         return asyncio.get_event_loop().run_until_complete(self.load(thread_id))
 
 
-class InMemoryCheckpointer:
-    """Fallback checkpointer để tránh làm hỏng toàn bộ chat khi DB async không khả dụng."""
-
-    def __init__(self):
-        self._store: dict[str, dict] = {}
-
-    async def save(self, thread_id: str, checkpoint: dict) -> None:
-        self._store[thread_id] = checkpoint
-
-    async def load(self, thread_id: str) -> Optional[dict]:
-        return self._store.get(thread_id)
-
-    def save_sync(self, thread_id: str, checkpoint: dict) -> None:
-        self._store[thread_id] = checkpoint
-
-    def load_sync(self, thread_id: str) -> Optional[dict]:
-        return self._store.get(thread_id)
-
 try:
     async_engine = create_async_engine(async_db_url, echo=False)
     app_checkpointer = AsyncPostgresSaver(async_engine)
@@ -153,8 +136,8 @@ try:
         pass
 except Exception as e:
     logger.error(f"Failed to create async engine for checkpointer: {e}")
-    app_checkpointer = InMemoryCheckpointer()
-    logger.warning("Using InMemoryCheckpointer fallback.")
+    app_checkpointer = MemorySaver()
+    logger.warning("Using LangGraph MemorySaver fallback.")
 
 def get_gemini_model():
     """Dependency để cung cấp mô hình LLM."""
@@ -171,8 +154,8 @@ def get_rag_usecase():
 def get_checkpointer():
     """Dependency để cung cấp bộ nhớ (memory)."""
     if app_checkpointer is None:
-        logger.warning("Checkpointer unavailable; using in-memory fallback at runtime.")
-        return InMemoryCheckpointer()
+        logger.warning("Checkpointer unavailable; using MemorySaver fallback at runtime.")
+        return MemorySaver()
     return app_checkpointer
 # === REFACTORED DEPENDENCY ===
 def get_tavily_tool() -> TavilySearch:

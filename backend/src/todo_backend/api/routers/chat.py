@@ -1,5 +1,6 @@
 #D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\api\routers\chat.py
 import io
+import json
 import logging
 import re
 import uuid
@@ -13,7 +14,7 @@ import docx
 # checkpointer is now async Postgres-backed; use generic typing
 from fastapi.responses import StreamingResponse
 from ...infrastructure.agent.gemini_tts_client import GeminiTSSClient
-from fastapi import (APIRouter, Depends, File, Form, HTTPException, Query,
+from fastapi import (APIRouter, Depends, File, Form, Header, HTTPException, Query,
                      UploadFile, status)
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pypdf import PdfReader
@@ -38,6 +39,11 @@ from .auth import get_current_user
 logger = logging.getLogger(__name__)
 AudioSegment.converter = "C:\\ffmpeg\\ffmpeg-2025-11-06-git-222127418b-full_build\\bin\\ffmpeg.exe"
 router = APIRouter( prefix = "/chat" , tags = ["Chat agent "])
+
+
+def _sse_event(payload: dict[str, Any]) -> str:
+    """Format one Server-Sent Event frame."""
+    return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
 def get_db():
     db = sessionLocal()
@@ -94,6 +100,7 @@ async def chat_with_agent(
     user: user_dependency,
     agent_service: agent_service_dependency,  # ✅ Inject AgentService
     thread_service: chat_thread_service_dependency,
+    x_gemini_api_key: Optional[str] = Header(default=None, alias="X-Gemini-API-Key"),
 ):
     """
     ✅ FIXED: Dùng AgentService thay vì tạo agent mới
@@ -123,7 +130,8 @@ async def chat_with_agent(
     try:
         agent_response = await agent_service.run_text_command(
             user_query=user_message,
-            thread_id=thread_id_to_use
+            thread_id=thread_id_to_use,
+            custom_api_key=x_gemini_api_key,
         )
         if agent_response.friendly_message:
             thread_service.add_message(
@@ -141,6 +149,103 @@ async def chat_with_agent(
             needs_clarification=False,
             clarification_prompt=None
         )
+
+
+@router.post("/stream")
+async def chat_with_agent_stream(
+    request: ChatRequest,
+    user: user_dependency,
+    agent_service: agent_service_dependency,
+    thread_service: chat_thread_service_dependency,
+    x_gemini_api_key: Optional[str] = Header(default=None, alias="X-Gemini-API-Key"),
+):
+    """Stream text response for chat UI using SSE.
+
+    Event payloads:
+    - {"type": "chunk", "content": "...", "thread_id": "..."}
+    - {"type": "done", "thread_id": "...", "needs_clarification": bool, ...}
+    - {"type": "error", "message": "...", "thread_id": "..."}
+    """
+    owner_id = user["id"]
+    user_message = _sanitize_message(request.message)
+    client_thread_id = request.thread_id
+    thread_id_to_use: str
+
+    if client_thread_id:
+        if not client_thread_id.startswith(f"user_chat_session_{owner_id}_"):
+            raise HTTPException(status_code=403, detail="Không có quyền truy cập")
+        thread_id_to_use = client_thread_id
+        thread_service.ensure_thread(thread_id_to_use)
+    else:
+        thread_id_to_use = f"user_chat_session_{owner_id}_{uuid.uuid4()}"
+        thread_service.create_thread(thread_id_to_use, title=None)
+
+    # Persist user message first to keep DB memory consistent.
+    thread_service.add_message(thread_id=thread_id_to_use, role="user", content=user_message)
+
+    async def _event_generator():
+        assistant_text = ""
+        try:
+            agent_response = await agent_service.run_text_command(
+                user_query=user_message,
+                thread_id=thread_id_to_use,
+                custom_api_key=x_gemini_api_key,
+            )
+            assistant_text = str(agent_response.friendly_message or "")
+
+            # Stream by token-like chunks (words) for typewriter UX.
+            words = assistant_text.split()
+            if not words:
+                yield _sse_event({"type": "chunk", "content": "", "thread_id": thread_id_to_use})
+            else:
+                for index, word in enumerate(words):
+                    chunk = word if index == len(words) - 1 else f"{word} "
+                    yield _sse_event({"type": "chunk", "content": chunk, "thread_id": thread_id_to_use})
+
+            # Persist assistant response after streaming completes.
+            if assistant_text:
+                thread_service.add_message(
+                    thread_id=thread_id_to_use,
+                    role="assistant",
+                    content=assistant_text,
+                )
+
+            yield _sse_event(
+                {
+                    "type": "done",
+                    "thread_id": thread_id_to_use,
+                    "needs_clarification": bool(agent_response.needs_clarification),
+                    "clarification_prompt": agent_response.clarification_prompt,
+                }
+            )
+        except Exception as exc:
+            logger.error(f"Streaming chat failed: {exc}", exc_info=True)
+            if assistant_text:
+                try:
+                    thread_service.add_message(
+                        thread_id=thread_id_to_use,
+                        role="assistant",
+                        content=assistant_text,
+                    )
+                except Exception:
+                    logger.warning("Failed to persist partial assistant stream", exc_info=True)
+            yield _sse_event(
+                {
+                    "type": "error",
+                    "message": "Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý.",
+                    "thread_id": thread_id_to_use,
+                }
+            )
+
+    return StreamingResponse(
+        _event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.get("/threads", response_model=ThreadListResponse)
@@ -348,7 +453,8 @@ async def chat_with_voice(
     user: user_dependency,
     agent_service: agent_service_dependency,
     audio: UploadFile = File(...),
-    thread_id: Optional[str] = Form(None)
+    thread_id: Optional[str] = Form(None),
+    x_gemini_api_key: Optional[str] = Header(default=None, alias="X-Gemini-API-Key"),
 ):
     """
     Nhận file ghi âm, xử lý qua Agent và trả về phản hồi dạng text.
@@ -416,7 +522,8 @@ async def chat_with_voice(
         response_text = await agent_service.run_voice_command(
             audio_bytes=audio_content,
             mime_type=audio.content_type,
-            thread_id=current_thread_id
+            thread_id=current_thread_id,
+            custom_api_key=x_gemini_api_key,
         )
         if response_text.needs_clarification:
             tts_text = response_text.clarification_prompt or response_text.friendly_message

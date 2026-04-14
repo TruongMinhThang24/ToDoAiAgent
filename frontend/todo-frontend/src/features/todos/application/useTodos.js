@@ -1,26 +1,58 @@
 // src/features/todos/application/useTodos.js
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { todoRepository } from '../infrastructure/todoRepository';
+
+const normalizeTodo = (todo) => {
+  const status = todo?.status || (todo?.completed ? 'completed' : 'not_started');
+  return {
+    ...todo,
+    status,
+    completed: status === 'completed',
+    is_vital: Boolean(todo?.is_vital),
+    checklist_data: Array.isArray(todo?.checklist_data) ? todo.checklist_data : [],
+    thumbnail_url: todo?.thumbnail_url || null,
+  };
+};
+
+const getErrorMessage = (err, fallback) => (
+  err?.response?.data?.detail
+  || err?.response?.data?.message
+  || err?.message
+  || fallback
+);
 
 // ✅ FIX: export default function useTodos() -> export const useTodos
 export const useTodos = () => {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const [selectedTodo, setSelectedTodo] = useState(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const lastQueryRef = useRef({ page: 1, page_size: 20 });
 
-  const fetchTodos = useCallback(async () => {
+  const fetchTodos = useCallback(async (params = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await todoRepository.getAllTodos();
-      setTodos(data);
+      const mergedParams = {
+        ...lastQueryRef.current,
+        ...params,
+      };
+      lastQueryRef.current = mergedParams;
+
+      const data = await todoRepository.getAllTodos(mergedParams);
+      setTodos((data.items || []).map(normalizeTodo));
+      setTotal(data.total ?? 0);
+      setPage(data.page ?? mergedParams.page ?? 1);
+      setPageSize(data.page_size ?? mergedParams.page_size ?? 20);
     } catch (err) {
-      setError(err.message || 'Failed to fetch todos');
+      setError(getErrorMessage(err, 'Failed to fetch todos'));
     } finally {
       setLoading(false);
     }
@@ -30,52 +62,53 @@ export const useTodos = () => {
     setLoading(true); // Có thể dùng state riêng
     setError(null);
     try {
-      const newTodo = await todoRepository.addTodo(todoData);
-      setTodos(prev => [...prev, newTodo]);
+      const payload = {
+        ...todoData,
+        status: todoData.status || (todoData.completed ? 'completed' : 'not_started'),
+      };
+      const createdTodo = await todoRepository.addTodo(payload);
+      await fetchTodos(lastQueryRef.current);
+      if (createdTodo?.id) {
+        setSelectedTodo(normalizeTodo(createdTodo));
+      }
+      return true;
     } catch (err) {
-      setError(err.message || 'Failed to add todo');
+      const message = getErrorMessage(err, 'Failed to add todo');
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false); // Tắt loading chung
     }
-  }, []);
+  }, [fetchTodos]);
 
   const removeTodo = useCallback(async (id) => {
-    // Không set loading để UI mượt hơn
     try {
       await todoRepository.deleteTodo(id);
-      setTodos(prev => prev.filter(t => t.id !== id));
+      await fetchTodos(lastQueryRef.current);
     } catch (err) {
-      setError(err.message || 'Failed to delete todo');
+      setError(getErrorMessage(err, 'Failed to delete todo'));
     }
-    // Không set loading
-  }, []);
+  }, [fetchTodos]);
 
   const toggleTodo = useCallback(async (todo) => {
-    // ✅ FIX: Logic cho API 204 NO CONTENT
-    // 1. Tạo dữ liệu sẽ được gửi đi
+    const nextStatus = todo.completed ? 'in_progress' : 'completed';
     const updatedData = { 
       ...todo, 
       completed: !todo.completed,
-      due_date: todo.due_date // Đảm bảo gửi đủ các trường
+      status: nextStatus,
+      due_date: todo.due_date,
     }; 
     
     try {
-      // 2. Cập nhật "lạc quan" (optimistic update) ngay lập tức
       setTodos(prev => prev.map(t => (t.id === todo.id ? updatedData : t)));
-      
-      // 3. Gửi request lên API
-      // (Repo không trả về gì cả)
       await todoRepository.updateTodo(todo.id, updatedData);
-      
-      // 4. Nếu thành công, state đã đúng.
+      await fetchTodos(lastQueryRef.current);
       
     } catch (err) {
-      setError(err.message || 'Failed to update todo');
-      // 5. Nếu lỗi, rollback lại state cũ
+      setError(getErrorMessage(err, 'Failed to update todo'));
       setTodos(prev => prev.map(t => (t.id === todo.id ? todo : t)));
     }
-    // Không set loading để toggle mượt hơn
-  }, []);
+  }, [fetchTodos]);
 
 
   const getTodoDetails = useCallback(async (id) => {
@@ -83,7 +116,7 @@ export const useTodos = () => {
     try {
       // Gọi repo lấy dữ liệu mới nhất từ server
       const data = await todoRepository.getTodoById(id);
-      setSelectedTodo(data);
+      setSelectedTodo(normalizeTodo(data));
     } catch (err) {
       console.error(err);
       // Fallback: Nếu lỗi mạng, thử tìm trong danh sách local
@@ -100,10 +133,14 @@ export const useTodos = () => {
   }, []);
 
   const updateTodoDetails = useCallback(async (id, updatedData) => {
+    const mergedData = {
+      ...updatedData,
+      status: updatedData.status || (updatedData.completed ? 'completed' : 'in_progress'),
+    };
     // 1. Chuẩn bị dữ liệu mới (để cập nhật giao diện ngay lập tức)
     const newOptimisticData = { 
-        ...updatedData, 
-        due_date: updatedData.due_date || null 
+        ...mergedData,
+        due_date: mergedData.due_date || null 
     };
 
     // ✅ FIX QUAN TRỌNG: Cập nhật ngay cái Todo đang được chọn (để Modal hiển thị cái mới)
@@ -120,15 +157,34 @@ export const useTodos = () => {
     ));
 
     try {
-      // 3. Gọi API update
-      await todoRepository.updateTodo(id, updatedData);
+      await todoRepository.updateTodo(id, mergedData);
+      await fetchTodos(lastQueryRef.current);
+      await getTodoDetails(id);
+      return true;
     } catch (err) {
+      const message = getErrorMessage(err, 'Cập nhật thất bại, vui lòng thử lại.');
       console.error("Update failed:", err);
-      setError("Cập nhật thất bại, vui lòng thử lại.");
-      // Rollback nếu lỗi: Fetch lại từ server để lấy data đúng
-      fetchTodos(); 
+      setError(message);
+      await fetchTodos(lastQueryRef.current);
+      throw new Error(message);
     }
-  }, [fetchTodos]);
+  }, [fetchTodos, getTodoDetails]);
 
-  return { todos, loading, error, fetchTodos, createNewTodo, removeTodo, toggleTodo, selectedTodo, getTodoDetails, isLoadingDetail, clearSelectedTodo, updateTodoDetails };
+  return {
+    todos,
+    loading,
+    error,
+    total,
+    page,
+    pageSize,
+    fetchTodos,
+    createNewTodo,
+    removeTodo,
+    toggleTodo,
+    selectedTodo,
+    getTodoDetails,
+    isLoadingDetail,
+    clearSelectedTodo,
+    updateTodoDetails,
+  };
 }

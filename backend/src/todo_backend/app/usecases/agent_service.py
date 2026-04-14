@@ -1,5 +1,7 @@
 # D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\app\usecases\agent_service.py
 import logging
+import asyncio
+import os
 from typing import Optional , Any
 import re
 import inspect
@@ -194,7 +196,10 @@ class AgentService:
             temperature=0.7,
             convert_system_message_to_human=True
         )
+        self.model_name = getattr(self.model, "model", "gemini-2.5-flash")
+        self.model_temperature = getattr(self.model, "temperature", 0.7)
         self.checkpointer = checkpointer
+        self.custom_agent_executors: dict[str, Any] = {}
 
          # ✅ CRITICAL: Tính toán thời gian THỰC với timezone
         vietnam_tz = pytz.timezone("Asia/Ho_Chi_Minh")
@@ -221,8 +226,12 @@ class AgentService:
 
         self.question_pattern = re.compile(
             r'\?$|hỏi.*\?|cho.*biết.*\?|mô tả.*\?|tiêu đề.*\?', re.IGNORECASE)
+        self.greeting_pattern = re.compile(
+            r'^(hi|hello|helo|hey|xin\s*chào|chào|yo)$',
+            re.IGNORECASE,
+        )
         
-    def _initialize_agent(self):
+    def _initialize_agent(self, model_override: Optional[ChatGoogleGenerativeAI] = None):
         """
         Thiết lập và khởi tạo ReAct Agent sử dụng LangGraph.
         """
@@ -231,15 +240,63 @@ class AgentService:
         logger.info(f"📋 Registered tools: {[tool.name for tool in tools]}")
         for tool in tools:
             logger.info(f"  - {tool.name}: {tool.description[:100]}...")
+
+        # LangGraph checkpointer cần API chuyên biệt (ví dụ get_next_version).
+        # Nếu object hiện tại không tương thích, tắt checkpointer để tránh crash runtime.
+        runtime_checkpointer = self.checkpointer
+        if runtime_checkpointer is not None:
+            required_attrs = ("get_next_version",)
+            if not all(hasattr(runtime_checkpointer, attr) for attr in required_attrs):
+                logger.warning(
+                    "Checkpointer %s is incompatible with LangGraph runtime; disabling checkpoint memory.",
+                    runtime_checkpointer.__class__.__name__,
+                )
+                runtime_checkpointer = None
+
+        # Lưu lại checkpointer thực sự dùng trong runtime để đồng bộ invoke mode phía dưới.
+        self.runtime_checkpointer = runtime_checkpointer
+
         # Tạo prebuilt ReAct agent với prompt HITL
+        active_model = model_override or self.model
         agent_executor = create_react_agent(
-            self.model, 
+            active_model,
             tools=tools, 
-            checkpointer=self.checkpointer  
+            checkpointer=runtime_checkpointer,
         )
         
         logger.info(f"Agent initialized successfully for user {self.user_id} with tools and HITL prompt.")
         return agent_executor
+
+    def _build_model_with_api_key(self, api_key: str) -> ChatGoogleGenerativeAI:
+        """Create a Gemini model instance for a runtime BYOK key."""
+        return ChatGoogleGenerativeAI(
+            model=self.model_name,
+            google_api_key=api_key,
+            temperature=self.model_temperature,
+            convert_system_message_to_human=True,
+        )
+
+    def _get_agent_executor_for_key(self, custom_api_key: Optional[str]) -> Any:
+        """Resolve executor for BYOK runtime key.
+
+        Priority: custom key from request header -> env key configured at startup.
+        """
+        cleaned_custom_key = (custom_api_key or "").strip()
+        if not cleaned_custom_key:
+            return self.agent_executor
+
+        default_key = (os.getenv("GEMINI_API_KEY") or "").strip()
+        if cleaned_custom_key == default_key:
+            return self.agent_executor
+
+        if cleaned_custom_key not in self.custom_agent_executors:
+            logger.info("🔐 Creating BYOK agent executor for user %s", self.user_id)
+            custom_model = self._build_model_with_api_key(cleaned_custom_key)
+            self.custom_agent_executors[cleaned_custom_key] = self._initialize_agent(
+                model_override=custom_model
+            )
+
+        return self.custom_agent_executors[cleaned_custom_key]
 
     def _is_async_checkpointer(self) -> bool:
         """Detect whether the configured checkpointer exposes async methods.
@@ -247,13 +304,18 @@ class AgentService:
         LangGraph supports both sync and async checkpointers. We switch the
         invocation path accordingly to avoid event-loop/thread errors.
         """
-        cp = self.checkpointer
+        cp = getattr(self, "runtime_checkpointer", None)
         if cp is None:
             return False
         async_attrs = ("load", "save", "aget", "aset")
         return any(inspect.iscoroutinefunction(getattr(cp, attr, None)) for attr in async_attrs)
     
-    async def run_text_command(self, user_query: str, thread_id: str) -> AgentChatReponse:
+    async def run_text_command(
+        self,
+        user_query: str,
+        thread_id: str,
+        custom_api_key: Optional[str] = None,
+    ) -> AgentChatReponse:
         """
         Xử lý yêu cầu từ văn bản (Text-to-Action) với HITL parsing.
         """
@@ -265,9 +327,19 @@ class AgentService:
                 clarification_prompt="Hãy cho tôi biết bạn muốn làm gì nhé!"
             )
 
+        # Fast-path cho lời chào đơn giản để tránh phụ thuộc LLM/network cho case cơ bản.
+        if self.greeting_pattern.match(user_query.strip()):
+            return AgentChatReponse(
+                friendly_message="Xin chào! Tôi có thể giúp bạn quản lý task, nhắc deadline hoặc trả lời câu hỏi.",
+                thread_id=thread_id,
+                needs_clarification=False,
+                clarification_prompt=None,
+            )
+
         logger.info(f"Agent executing text command: '{user_query}' for thread: {thread_id}")
 
         config = {"configurable": {"thread_id": thread_id}}
+        active_executor = self._get_agent_executor_for_key(custom_api_key)
 
         try:
             inputs = {
@@ -285,7 +357,7 @@ class AgentService:
             logger.info("🤖 Agent config:")
             logger.info(f"  - Model: {self.model.model}")
             logger.info(f"  - Temperature: {self.model.temperature}")
-            logger.info(f"  - Tools: {[tool.name for tool in self.agent_executor.tools] if hasattr(self.agent_executor, 'tools') else 'Unknown'}")
+            logger.info(f"  - Tools: {[tool.name for tool in active_executor.tools] if hasattr(active_executor, 'tools') else 'Unknown'}")
             logger.info(f"📤 Agent invoked with query: '{user_query}'")
 
             use_async = self._is_async_checkpointer()
@@ -295,10 +367,31 @@ class AgentService:
                 self.checkpointer.__class__.__name__ if self.checkpointer else "None",
             )
 
-            if use_async:
-                response = await self.agent_executor.ainvoke(inputs, config=config)
-            else:
-                response = self.agent_executor.invoke(inputs, config=config)
+            response = None
+            last_invoke_error: Exception | None = None
+
+            # Retry ngắn cho lỗi tạm thời từ provider/network.
+            for attempt in range(2):
+                try:
+                    if use_async:
+                        response = await active_executor.ainvoke(inputs, config=config)
+                    else:
+                        response = active_executor.invoke(inputs, config=config)
+                    last_invoke_error = None
+                    break
+                except Exception as invoke_error:
+                    last_invoke_error = invoke_error
+                    logger.warning(
+                        "Agent invoke failed (attempt %s/2) for thread %s: %s",
+                        attempt + 1,
+                        thread_id,
+                        invoke_error,
+                    )
+                    if attempt == 0:
+                        await asyncio.sleep(0.8)
+
+            if response is None and last_invoke_error is not None:
+                raise last_invoke_error
 
             # --- PARSE RESPONSE ---
             last_message = response.get("messages", [])[-1]
@@ -381,13 +474,19 @@ class AgentService:
                 exc_info=True
             )
             return AgentChatReponse(
-                friendly_message="Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý.",
+                friendly_message="Xin lỗi, dịch vụ AI tạm thời bận hoặc kết nối không ổn định. Vui lòng thử lại sau vài giây.",
                 thread_id=thread_id,
                 needs_clarification=False,
                 clarification_prompt=None
             )
 
-    async def run_voice_command(self, audio_bytes: bytes, thread_id: str, mime_type: str = "audio/mp3") -> AgentChatReponse:
+    async def run_voice_command(
+        self,
+        audio_bytes: bytes,
+        thread_id: str,
+        mime_type: str = "audio/mp3",
+        custom_api_key: Optional[str] = None,
+    ) -> AgentChatReponse:
         """
         Xử lý yêu cầu từ giọng nói (Voice-to-Action).
         Transcribe audio → run_text_command.
@@ -413,7 +512,11 @@ class AgentService:
             logger.info(f"Voice transcribed for thread {thread_id}: '{transcribed_text}'")
 
             # Giờ run_text_command return object
-            agent_response = await self.run_text_command(transcribed_text, thread_id=thread_id)
+            agent_response = await self.run_text_command(
+                transcribed_text,
+                thread_id=thread_id,
+                custom_api_key=custom_api_key,
+            )
 
             return agent_response
         

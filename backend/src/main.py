@@ -19,10 +19,12 @@ from todo_backend.api.routers.chat import router as chat_router
 from todo_backend.api.routers.agent import router as agent_router
 from todo_backend.api.routers.error_test import router as error_test_router
 from todo_backend.api.routers.todos import router as todos_router
+from todo_backend.api.routers.task_categories import router as task_categories_router
 from todo_backend.api.routers.user import router as user_router
 from todo_backend.domain.entities import models
 from todo_backend.infrastructure.database.database import (engine,
-                                                           sessionLocal)
+                                                           sessionLocal,
+                                                           ensure_todos_schema_compatibility)
 #import error_handling for main.py
 from todo_backend.infrastructure.error_handling.error_handler import \
     error_handler
@@ -50,6 +52,9 @@ async def csrf_middleware(request, call_next):
 #register global handling
 error_handler.register_app_handlers(app)
 
+# Ensure legacy local SQLite tables are upgraded with required columns
+# before ORM writes happen.
+ensure_todos_schema_compatibility()
 models.Base.metadata.create_all(bind=engine)
 
 # --- (INCLUDE ROUTER MỚI) ---
@@ -58,6 +63,7 @@ app.include_router(agent_router, prefix="/api/v1")
 app.include_router(notification_router, prefix="/api/v1")
 app.include_router(auth_router)
 app.include_router(todos_router, prefix="/api/v1")
+app.include_router(task_categories_router, prefix="/api/v1")
 app.include_router(admin_router)
 app.include_router(user_router)
 app.include_router(error_test_router)

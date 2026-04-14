@@ -1,5 +1,5 @@
 #D:\Todos\thangtm25-Todos\Todos\backend\src\todo_backend\infrastructure\repositories\todo_repository_impl.py
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -13,6 +13,8 @@ class TodoRepositoryImpl(TodoRepository):
         self.db = db
 
     def create(self, todo: Todo) -> Todo:
+        if todo.status == "completed":
+            todo.completed = True
         self.db.add(todo)
         self.db.commit()
         self.db.refresh(todo)
@@ -24,14 +26,32 @@ class TodoRepositoryImpl(TodoRepository):
     def get_by_id_and_owner(self, todo_id: int, owner_id: int) -> Optional[Todo]:
         return self.db.query(Todo).filter(Todo.id == todo_id, Todo.owner_id == owner_id).first()
 
-    def update(self, todo_id: int, owner_id: int, title: str, description: str, priority: int, completed: bool,due_date: Optional[datetime] = None) -> bool:
+    def update(
+        self,
+        todo_id: int,
+        owner_id: int,
+        title: str,
+        description: str,
+        priority: int,
+        completed: bool,
+        due_date: Optional[datetime] = None,
+        status: str = "not_started",
+        thumbnail_url: Optional[str] = None,
+        is_vital: bool = False,
+        checklist_data: Optional[list[dict[str, Any]]] = None,
+    ) -> bool:
         todo = self.get_by_id_and_owner(todo_id, owner_id)
         if todo:
             todo.title = title
             todo.description = description
             todo.priority = priority
-            todo.completed = completed
+            normalized_status = "completed" if completed else status
+            todo.status = normalized_status
+            todo.completed = normalized_status == "completed"
             todo.due_date = due_date
+            todo.thumbnail_url = thumbnail_url
+            todo.is_vital = is_vital
+            todo.checklist_data = checklist_data
             self.db.commit()
             return True
         return False

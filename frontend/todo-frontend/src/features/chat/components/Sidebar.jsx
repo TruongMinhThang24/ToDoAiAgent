@@ -3,7 +3,21 @@
 import { Card, Button } from 'flowbite-react';
 import { HiMenu, HiX } from 'react-icons/hi'; // ← SỬA: hi thay vì hi2
 
-export const Sidebar = ({ visible, toggleSidebar, chatHistory }) => {
+export const Sidebar = ({
+  visible,
+  toggleSidebar,
+  chatHistory,
+  currentThreadId,
+  onCreateThread,
+  onSelectThread,
+  onDeleteThread,
+  isLoadingThreads,
+}) => {
+  const formatDate = (value) => {
+    if (!value) return '';
+    return new Date(value).toLocaleDateString('vi-VN');
+  };
+
   return (
     <>
       {!visible && (
@@ -42,26 +56,43 @@ export const Sidebar = ({ visible, toggleSidebar, chatHistory }) => {
           </Button>
         </div>
 
+        <Button size="sm" color="blue" className="w-full mb-3" onClick={onCreateThread}>
+          + New Chat
+        </Button>
+
         <div className="space-y-2">
-          {chatHistory.length === 0 ? (
+          {isLoadingThreads ? (
+            <p className="text-sm text-gray-500 text-center py-4">Đang tải hội thoại...</p>
+          ) : chatHistory.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-4">
               Chưa có lịch sử chat
             </p>
           ) : (
             chatHistory.map((chat) => (
               <Card
-                key={chat.id}
-                className="cursor-pointer hover:bg-gray-100 transition-colors"
+                key={chat.thread_id}
+                className={`cursor-pointer hover:bg-gray-100 transition-colors ${
+                  currentThreadId === chat.thread_id ? 'ring-2 ring-blue-300' : ''
+                }`}
+                onClick={() => onSelectThread(chat.thread_id)}
               >
-                <h5 className="text-sm font-semibold text-gray-900 truncate">
+                <div className="flex items-start justify-between gap-2">
+                  <h5 className="text-sm font-semibold text-gray-900 truncate">
                   {chat.title}
-                </h5>
-                <p className="text-xs text-gray-600 truncate">
-                  {chat.lastMessage}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {chat.timestamp.toLocaleDateString('vi-VN')}
-                </p>
+                  </h5>
+                  <button
+                    type="button"
+                    className="text-xs text-red-500 hover:text-red-700"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteThread(chat.thread_id);
+                    }}
+                  >
+                    Xóa
+                  </button>
+                </div>
+                <p className="text-xs text-gray-600 truncate">{chat.last_message}</p>
+                <p className="text-xs text-gray-400">{formatDate(chat.updated_at)}</p>
               </Card>
             ))
           )}

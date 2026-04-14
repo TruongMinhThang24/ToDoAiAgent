@@ -45,7 +45,7 @@ async def check_due_todos():
         upcoming_todos = db.query(Todo).filter(
             Todo.due_date >= now_utc_naive,
             Todo.due_date <= due_soon_limit_naive,
-            Todo.completed.is_(False)
+            Todo.completed == False
         ).all()
         if not upcoming_todos:
             logger.info("Scheduler: Không tìm thấy todo nào sắp hết hạn.")

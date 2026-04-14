@@ -1,0 +1,82 @@
+<div data-layer="Calender" className="Calender size-96 relative">
+  <div data-layer="Calender" className="Calender size-96 left-0 top-0 absolute bg-violet-50 rounded-2xl shadow-[0px_6px_12px_0px_rgba(0,0,0,0.10)] shadow-[0px_22px_22px_0px_rgba(0,0,0,0.09)] shadow-[0px_50px_30px_0px_rgba(0,0,0,0.05)] shadow-[0px_89px_35px_0px_rgba(0,0,0,0.01)] shadow-[0px_138px_39px_0px_rgba(0,0,0,0.00)]">
+    <div data-layer="Calendar" className="Calendar left-[32px] top-[25px] absolute justify-start text-black text-base font-semibold font-['Inter']">Calendar</div>
+    <div data-svg-wrapper data-layer="Vector" className="Vector left-[325px] top-[25px] absolute">
+      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M23 19.6098C20.3089 16.3246 17.9191 14.4607 15.8302 14.0174C13.7419 13.5746 11.7536 13.5076 9.8649 13.8167V19.7L1 10.0998L9.8649 1V6.59185C13.3569 6.61935 16.3252 7.87225 18.7705 10.35C21.2153 12.8278 22.6255 15.9143 23 19.6098Z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div data-svg-wrapper data-layer="Vector" className="Vector left-[322.80px] top-[21.15px] absolute">
+      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M-1.19995 -2.84998H25.2001V23.55H-1.19995V-2.84998Z" fill="#FF6767"/>
+      </svg>
+    </div>
+    <div data-layer="Rectangle 30" className="Rectangle30 w-80 h-9 left-[32px] top-[56px] absolute rounded-md border border-zinc-400" />
+    <div data-layer="x" className="X left-[328px] top-[64px] absolute justify-start text-zinc-400 text-base font-semibold font-['Inter']">x</div>
+    <div data-layer="June 6, 2023" className="June62023 left-[43px] top-[65px] absolute justify-start text-black text-sm font-semibold font-['Inter']">June 6, 2023</div>
+    <div data-layer="June 2023" className="June2023 left-[152px] top-[115px] absolute justify-start text-black text-sm font-semibold font-['Inter']">June 2023</div>
+    <div data-svg-wrapper data-layer="Rectangle 31" className="Rectangle31 left-[32px] top-[104px] absolute">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0.5" y="0.5" width="37" height="37" rx="6.5" stroke="#A1A3AB"/>
+      </svg>
+    </div>
+    <div data-svg-wrapper data-layer="Vector" className="Vector left-[46px] top-[115px] absolute">
+      <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M0.292787 7.37629C0.105316 7.18876 0 6.93445 0 6.66929C0 6.40412 0.105316 6.14982 0.292787 5.96229L5.94979 0.305288C6.04203 0.209778 6.15238 0.133596 6.27438 0.0811869C6.39639 0.0287779 6.52761 0.00119157 6.66039 3.77564e-05C6.79316 -0.00111606 6.92484 0.0241859 7.04774 0.0744668C7.17064 0.124748 7.28229 0.199001 7.37618 0.292893C7.47007 0.386786 7.54433 0.498438 7.59461 0.621334C7.64489 0.744231 7.67019 0.87591 7.66904 1.00869C7.66788 1.14147 7.6403 1.27269 7.58789 1.39469C7.53548 1.5167 7.4593 1.62704 7.36379 1.71929L2.41379 6.66929L7.36379 11.6193C7.54594 11.8079 7.64674 12.0605 7.64446 12.3227C7.64218 12.5849 7.53701 12.8357 7.35161 13.0211C7.1662 13.2065 6.91538 13.3117 6.65319 13.314C6.39099 13.3162 6.13839 13.2154 5.94979 13.0333L0.292787 7.37629Z" fill="black"/>
+      </svg>
+    </div>
+    <div data-svg-wrapper data-layer="Rectangle 31" className="Rectangle31 left-[311px] top-[104px] absolute">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="37.5114" y="37.4976" width="37" height="37" rx="6.5" transform="rotate(179.979 37.5114 37.4976)" stroke="#A1A3AB"/>
+      </svg>
+    </div>
+    <div data-svg-wrapper data-layer="Vector" className="Vector left-[325.34px] top-[115.69px] absolute">
+      <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M7.3739 5.93534C7.56144 6.1228 7.66685 6.37707 7.66695 6.64224C7.66705 6.9074 7.56183 7.16175 7.37443 7.34934L1.71953 13.0084C1.62732 13.104 1.51701 13.1802 1.39502 13.2327C1.27304 13.2851 1.14183 13.3128 1.00905 13.314C0.87627 13.3152 0.744581 13.2899 0.621666 13.2397C0.498751 13.1894 0.387071 13.1152 0.293143 13.0214C0.199216 12.9275 0.124921 12.8159 0.0745947 12.693C0.0242679 12.5701 -0.00108253 12.4385 2.20311e-05 12.3057C0.00112659 12.1729 0.0286638 12.0417 0.0810276 11.9197C0.133391 11.7976 0.209532 11.6873 0.305008 11.595L5.25317 6.64313L0.301326 1.69497C0.119098 1.50644 0.0182095 1.25388 0.0203903 0.991678C0.0225711 0.729481 0.127647 0.478628 0.312986 0.293152C0.498325 0.107675 0.749099 0.00241161 1.01129 3.57663e-05C1.27349 -0.00234008 1.52613 0.0983598 1.7148 0.280448L7.3739 5.93534Z" fill="black"/>
+      </svg>
+    </div>
+    <div data-layer="MON" className="Mon left-[31px] top-[152.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">MON</div>
+    <div data-layer="TUE" className="Tue left-[84px] top-[152.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">TUE</div>
+    <div data-layer="WED" className="Wed left-[132px] top-[153px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">WED</div>
+    <div data-layer="THU" className="Thu left-[184px] top-[153px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">THU</div>
+    <div data-layer="FRI" className="Fri left-[233px] top-[152px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">FRI</div>
+    <div data-layer="SAT" className="Sat left-[275px] top-[152.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">SAT</div>
+    <div data-layer="SUN" className="Sun left-[322px] top-[152px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">SUN</div>
+    <div data-layer="2" className="left-[140px] top-[201px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">2</div>
+    <div data-layer="3" className="left-[188px] top-[201px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">3</div>
+    <div data-layer="4" className="left-[236px] top-[200px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">4</div>
+    <div data-layer="5" className="left-[284px] top-[200.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">5</div>
+    <div data-layer="7" className="left-[38px] top-[247.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">7</div>
+    <div data-layer="9" className="left-[139px] top-[248px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">9</div>
+    <div data-layer="10" className="left-[185px] top-[248px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">10</div>
+    <div data-layer="11" className="left-[234px] top-[247px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">11</div>
+    <div data-layer="12" className="left-[280px] top-[247.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">12</div>
+    <div data-layer="13" className="left-[328px] top-[247px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">13</div>
+    <div data-layer="14" className="left-[32px] top-[294.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">14</div>
+    <div data-layer="16" className="left-[136px] top-[295px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">16</div>
+    <div data-layer="17" className="left-[186px] top-[295px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">17</div>
+    <div data-layer="18" className="left-[234px] top-[294px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">18</div>
+    <div data-layer="19" className="left-[280px] top-[294.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">19</div>
+    <div data-layer="20" className="left-[328px] top-[294px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">20</div>
+    <div data-layer="21" className="left-[32px] top-[341.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">21</div>
+    <div data-layer="23" className="left-[135px] top-[342px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">23</div>
+    <div data-layer="24" className="left-[184px] top-[342px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">24</div>
+    <div data-layer="25" className="left-[235px] top-[341px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">25</div>
+    <div data-layer="26" className="left-[279px] top-[341.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">26</div>
+    <div data-layer="27" className="left-[328px] top-[341px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">27</div>
+    <div data-layer="28" className="left-[31px] top-[388.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">28</div>
+    <div data-layer="1" className="left-[93px] top-[200.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">1</div>
+    <div data-layer="8" className="left-[93px] top-[247.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">8</div>
+    <div data-layer="15" className="left-[85px] top-[294.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">15</div>
+    <div data-layer="22" className="left-[85px] top-[341.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">22</div>
+    <div data-layer="29" className="left-[84px] top-[388.01px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">29</div>
+    <div data-layer="30" className="left-[135px] top-[389px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">30</div>
+    <div data-layer="31" className="left-[185px] top-[389px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Inter']">31</div>
+    <div data-svg-wrapper data-layer="Ellipse 8" className="Ellipse8 left-[321px] top-[193px] absolute">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="15" cy="15" r="15" fill="#3211FF"/>
+      </svg>
+    </div>
+    <div data-layer="6" className="left-[332px] top-[200px] absolute justify-start text-white text-xs font-semibold font-['Inter']">6</div>
+  </div>
+</div>

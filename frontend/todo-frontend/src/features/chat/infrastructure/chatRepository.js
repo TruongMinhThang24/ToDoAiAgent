@@ -6,6 +6,29 @@
 import apiClient from '@/lib/service/apiClient';
 
 export const chatRepository = {
+  async getThreads(limit = 20, offset = 0) {
+    const response = await apiClient.get('/api/v1/chat/threads', {
+      params: { limit, offset },
+    });
+    return response.data;
+  },
+
+  async createThread(title = null) {
+    const response = await apiClient.post('/api/v1/chat/threads', { title });
+    return response.data;
+  },
+
+  async deleteThread(threadId) {
+    await apiClient.delete(`/api/v1/chat/threads/${threadId}`);
+  },
+
+  async getThreadMessages(threadId, limit = 200, offset = 0) {
+    const response = await apiClient.get(`/api/v1/chat/threads/${threadId}/messages`, {
+      params: { limit, offset },
+    });
+    return response.data;
+  },
+
   /**
    * Gửi tin nhắn text đến AI
    * POST /api/v1/chat
@@ -136,12 +159,9 @@ export const chatRepository = {
     }
   },
 
-  /**
-   * Lấy lịch sử chat
-   * TODO: BE cần thread_id cụ thể, FE cần danh sách → Trả về []
-   */
+  // Backward-compatible alias used by old code
   async getChatHistory() {
-    console.log('📜 API /history skipped (needs thread_id)');
-    return [];
+    const data = await this.getThreads();
+    return data.items || [];
   },
 };

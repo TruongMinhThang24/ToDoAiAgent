@@ -1,0 +1,170 @@
+<div data-layer="My Task" className="MyTask w-[1440px] h-[1024px] relative bg-slate-50 overflow-hidden">
+  <div data-layer="uit:clock" className="UitClock size-6 left-[365px] top-[120px] absolute" />
+  <div data-layer="Rectangle 1" className="Rectangle1 w-[1440px] h-24 left-0 top-0 absolute bg-stone-50 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.07)]" />
+  <div data-layer="Rectangle 2" className="Rectangle2 w-[695px] h-9 left-[391px] top-[38px] absolute bg-slate-50 rounded-lg shadow-[-1px_4px_10px_0px_rgba(0,0,0,0.04)] shadow-[-4px_17px_18px_0px_rgba(0,0,0,0.03)] shadow-[-9px_39px_24px_0px_rgba(0,0,0,0.02)] shadow-[-17px_69px_28px_0px_rgba(0,0,0,0.01)] shadow-[-26px_108px_31px_0px_rgba(0,0,0,0.00)]" />
+  <div data-layer="Search your task here..." className="SearchYourTaskHere left-[406px] top-[49px] absolute justify-start text-zinc-400 text-xs font-semibold font-['Montserrat']">Search your task here...</div>
+  <div data-svg-wrapper data-layer="Rectangle 3" className="Rectangle3 left-[1050px] top-[38px] absolute">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="36" height="36" rx="8" fill="#FF6767"/>
+    </svg>
+  </div>
+  <div data-svg-wrapper data-layer="Search" className="Search left-[1059.87px] top-[48.10px] absolute">
+    <svg width="16" height="15" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M6.31169 0.0176112C5.23016 0.095488 4.18294 0.430874 3.2574 0.995788C2.33185 1.5607 1.55482 2.33876 0.991128 3.26505C0.427438 4.19135 0.0934367 5.23901 0.0169896 6.32064C-0.0594575 7.40227 0.123867 8.48649 0.551667 9.48286C0.979467 10.4792 1.63934 11.3588 2.47623 12.0483C3.31312 12.7378 4.30275 13.2172 5.36257 13.4464C6.42239 13.6756 7.52167 13.648 8.56867 13.366C9.61568 13.084 10.5801 12.5557 11.3814 11.8252L14.505 14.5296C14.666 14.6642 14.8733 14.7301 15.0824 14.7132C15.2915 14.6964 15.4856 14.5981 15.6229 14.4395C15.7602 14.2809 15.8297 14.0747 15.8165 13.8654C15.8033 13.656 15.7083 13.4603 15.5522 13.3202L12.4285 10.6157C13.1449 9.5589 13.5494 8.32173 13.5955 7.04579C13.6416 5.76985 13.3276 4.5067 12.6894 3.40089C12.0512 2.29509 11.1145 1.3913 9.98662 0.792971C8.85873 0.19464 7.58517 -0.0740641 6.31169 0.0176112ZM1.61289 7.17312C1.51396 5.79754 1.96552 4.43901 2.86824 3.39638C3.77096 2.35375 5.05089 1.71242 6.42647 1.61349C7.80204 1.51456 9.16057 1.96612 10.2032 2.86884C11.2458 3.77156 11.8872 5.05149 11.9861 6.42707C12.085 7.80264 11.6335 9.16117 10.7307 10.2038C9.82802 11.2464 8.54809 11.8878 7.17252 11.9867C5.79694 12.0856 4.43841 11.6341 3.39578 10.7313C2.35314 9.82862 1.71182 8.54869 1.61289 7.17312Z" fill="white"/>
+    </svg>
+  </div>
+  <div data-svg-wrapper data-layer="Notifications" className="Notifications left-[1167px] top-[39px] absolute">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="34" height="34" rx="8" fill="#FF6767"/>
+    <path d="M19.3704 24.4889C19.3704 24.6068 19.3246 24.7199 19.2432 24.8032C19.1618 24.8866 19.0514 24.9334 18.9363 24.9334H14.3059C14.1907 24.9334 14.0803 24.8866 13.9989 24.8032C13.9175 24.7199 13.8717 24.6068 13.8717 24.4889C13.8717 24.3711 13.9175 24.258 13.9989 24.1747C14.0803 24.0913 14.1907 24.0445 14.3059 24.0445H18.9363C19.0514 24.0445 19.1618 24.0913 19.2432 24.1747C19.3246 24.258 19.3704 24.3711 19.3704 24.4889ZM23.2852 22.0445C23.1975 22.2027 23.0701 22.3342 22.9162 22.4253C22.7624 22.5165 22.5876 22.564 22.4098 22.563H10.833C10.655 22.5626 10.4802 22.5142 10.3262 22.4226C10.1723 22.331 10.0447 22.1995 9.95619 22.0413C9.86771 21.8831 9.82152 21.7039 9.82227 21.5216C9.82303 21.3393 9.8707 21.1604 9.96049 21.003C10.3693 20.2815 10.9777 18.2475 10.9777 15.6C10.9777 14.0677 11.5723 12.5981 12.6306 11.5145C13.689 10.431 15.1244 9.82227 16.6211 9.82227C18.1178 9.82227 19.5532 10.431 20.6115 11.5145C21.6698 12.5981 22.2644 14.0677 22.2644 15.6C22.2644 18.2467 22.8736 20.2815 23.2831 21.003C23.3738 21.1607 23.4219 21.3404 23.4223 21.5234C23.4226 21.7065 23.3753 21.8864 23.2852 22.0445ZM22.5321 21.4519C21.9844 20.4889 21.3962 18.243 21.3962 15.6C21.3962 14.3034 20.8931 13.0599 19.9976 12.1431C19.1021 11.2262 17.8875 10.7112 16.6211 10.7112C15.3546 10.7112 14.14 11.2262 13.2445 12.1431C12.349 13.0599 11.8459 14.3034 11.8459 15.6C11.8459 18.2437 11.257 20.4889 10.7093 21.4519C10.6966 21.4744 10.6899 21.5 10.6899 21.526C10.6899 21.552 10.6966 21.5775 10.7093 21.6C10.7212 21.6227 10.739 21.6416 10.7607 21.6547C10.7824 21.6678 10.8072 21.6745 10.8323 21.6741H22.4091C22.4342 21.6745 22.459 21.6678 22.4807 21.6547C22.5024 21.6416 22.5202 21.6227 22.5321 21.6C22.5448 21.5775 22.5515 21.552 22.5515 21.526C22.5515 21.5 22.5448 21.4744 22.5321 21.4519Z" fill="white"/>
+    </svg>
+  </div>
+  <div data-layer="To-Do" className="ToDo left-[72px] top-[37px] absolute justify-start"><span class="text-red-400 text-3xl font-semibold font-['Inter']">To</span><span class="text-black text-3xl font-semibold font-['Inter']">-Do</span></div>
+  <div data-svg-wrapper data-layer="Cal" className="Cal left-[1210px] top-[39px] absolute">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="34" height="34" rx="8" fill="#FF6767"/>
+    <path d="M23.3279 11.0946L19.9249 11.0946V10.2474C19.9249 10.0125 19.7347 9.82227 19.4999 9.82227C19.2651 9.82227 19.0749 10.0125 19.0749 10.2474V11.0944H15.6749V10.2474C15.6749 10.0125 15.4847 9.82227 15.2499 9.82227C15.0151 9.82227 14.8249 10.0125 14.8249 10.2474V11.0944H11.4279C10.9585 11.0944 10.5779 11.4751 10.5779 11.9446V22.5721C10.5779 23.0416 10.9585 23.4223 11.4279 23.4223H23.3279C23.7973 23.4223 24.1779 23.0416 24.1779 22.5721V11.9446C24.1779 11.4753 23.7973 11.0946 23.3279 11.0946ZM23.3279 22.5721H11.4279V11.9446H14.8249V12.3729C14.8249 12.6077 15.0151 12.798 15.2499 12.798C15.4847 12.798 15.6749 12.6077 15.6749 12.3729V11.9448H19.0749V12.3731C19.0749 12.6079 19.2651 12.7982 19.4999 12.7982C19.7347 12.7982 19.9249 12.6079 19.9249 12.3731V11.9448H23.3279V22.5721ZM20.3529 16.6209H21.2029C21.4375 16.6209 21.6279 16.4304 21.6279 16.1958V15.3456C21.6279 15.1109 21.4375 14.9205 21.2029 14.9205H20.3529C20.1183 14.9205 19.9279 15.1109 19.9279 15.3456V16.1958C19.9279 16.4304 20.1183 16.6209 20.3529 16.6209ZM20.3529 20.0215H21.2029C21.4375 20.0215 21.6279 19.8312 21.6279 19.5964V18.7462C21.6279 18.5115 21.4375 18.3211 21.2029 18.3211H20.3529C20.1183 18.3211 19.9279 18.5115 19.9279 18.7462V19.5964C19.9279 19.8314 20.1183 20.0215 20.3529 20.0215ZM17.8029 18.3211H16.9529C16.7183 18.3211 16.5279 18.5115 16.5279 18.7462V19.5964C16.5279 19.8312 16.7183 20.0215 16.9529 20.0215H17.8029C18.0375 20.0215 18.2279 19.8312 18.2279 19.5964V18.7462C18.2279 18.5117 18.0375 18.3211 17.8029 18.3211ZM17.8029 14.9205H16.9529C16.7183 14.9205 16.5279 15.1109 16.5279 15.3456V16.1958C16.5279 16.4304 16.7183 16.6209 16.9529 16.6209H17.8029C18.0375 16.6209 18.2279 16.4304 18.2279 16.1958V15.3456C18.2279 15.1107 18.0375 14.9205 17.8029 14.9205ZM14.4029 14.9205H13.5529C13.3183 14.9205 13.1279 15.1109 13.1279 15.3456V16.1958C13.1279 16.4304 13.3183 16.6209 13.5529 16.6209H14.4029C14.6375 16.6209 14.8279 16.4304 14.8279 16.1958V15.3456C14.8279 15.1107 14.6375 14.9205 14.4029 14.9205ZM14.4029 18.3211H13.5529C13.3183 18.3211 13.1279 18.5115 13.1279 18.7462V19.5964C13.1279 19.8312 13.3183 20.0215 13.5529 20.0215H14.4029C14.6375 20.0215 14.8279 19.8312 14.8279 19.5964V18.7462C14.8279 18.5117 14.6375 18.3211 14.4029 18.3211Z" fill="#F8F8FB"/>
+    </svg>
+  </div>
+  <div data-layer="Tuesday" className="Tuesday left-[1283px] top-[38px] absolute justify-start text-black text-base font-medium font-['Inter']">Tuesday</div>
+  <div data-layer="20/06/2023" className="062023 left-[1283px] top-[57px] absolute justify-start text-sky-400 text-sm font-medium font-['Inter']">20/06/2023</div>
+  <div data-layer="Frame 11" className="Frame11 w-96 h-[911px] left-[-35px] top-[113px] absolute">
+    <div data-layer="Rectangle 5" className="Rectangle5 w-96 h-[868px] left-0 top-[43px] absolute bg-red-400 rounded-tr-lg rounded-br-lg shadow-[0px_4px_12px_0px_rgba(0,0,0,0.08)]" />
+    <div data-layer="Sundar Gurung" className="SundarGurung w-28 left-[129px] top-[99px] absolute justify-start text-white text-base font-semibold font-['Inter']">Sundar Gurung</div>
+    <div data-layer="sundargurung360@gmail.com" className="Sundargurung360GmailCom w-44 left-[109px] top-[120px] absolute justify-start text-white text-xs font-normal font-['Inter']">sundargurung360@gmail.com</div>
+    <img data-layer="Ellipse 1" className="Ellipse1 size-20 left-[144px] top-0 absolute rounded-full border border-white" src="https://placehold.co/86x86" />
+    <div data-layer="Daahboard" data-property-1="Default" className="Daahboard w-72 h-14 left-[56px] top-[152px] absolute rounded-tr-lg rounded-br-lg">
+      <div data-layer="Rectangle 7" className="Rectangle7 w-72 h-14 left-0 top-0 absolute bg-zinc-300/0 rounded-2xl" />
+      <div data-svg-wrapper data-layer="Vector" className="Vector left-[16px] top-[17px] absolute">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13.3333 8V0H24V8H13.3333ZM0 13.3333V0H10.6667V13.3333H0ZM13.3333 24V10.6667H24V24H13.3333ZM0 24V16H10.6667V24H0Z" fill="white"/>
+        </svg>
+      </div>
+      <div data-layer="Dashboard" className="Dashboard left-[56px] top-[20px] absolute justify-start text-white text-base font-medium font-['Inter']">Dashboard</div>
+    </div>
+    <div data-layer="Rectangle 7" className="Rectangle7 w-72 h-14 left-[56px] top-[290px] absolute bg-white rounded-2xl" />
+    <div data-svg-wrapper data-layer="my task" className="MyTask left-[72px] top-[307px] absolute">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 22H19C20.103 22 21 21.103 21 20V5C21 3.897 20.103 3 19 3H17C17 2.73478 16.8946 2.48043 16.7071 2.29289C16.5196 2.10536 16.2652 2 16 2H8C7.73478 2 7.48043 2.10536 7.29289 2.29289C7.10536 2.48043 7 2.73478 7 3H5C3.897 3 3 3.897 3 5V20C3 21.103 3.897 22 5 22ZM5 5H7V7H17V5H19V20H5V5Z" fill="#FF6767"/>
+      <path d="M11 13.586L9.20697 11.793L7.79297 13.207L11 16.414L16.207 11.207L14.793 9.79297L11 13.586Z" fill="#FF6767"/>
+      </svg>
+    </div>
+    <div data-layer="My Task" className="MyTask left-[112px] top-[310px] absolute justify-start text-red-400 text-base font-medium font-['Inter']">My Task</div>
+    <div data-layer="Task Categories" data-property-1="Default" className="TaskCategories w-72 h-14 left-[56px] top-[359px] absolute rounded-tr-lg rounded-br-lg">
+      <div data-layer="Rectangle 7" className="Rectangle7 w-72 h-14 left-0 top-0 absolute bg-zinc-300/0 rounded-2xl" />
+      <div data-svg-wrapper data-layer="Vector" className="Vector left-[16px] top-[17px] absolute">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9.65329 19.7143H24V21.4286H9.65329V19.7143ZM2.65414 20.5714L0.0102479 22.7829L1.45517 24L5.55423 20.5714L1.45517 17.1429L0 18.3514L2.65414 20.5714ZM9.65329 11.1429H24V12.8571H9.65329V11.1429ZM2.65414 12L0.0102479 14.2114L1.45517 15.4286L5.55423 12L1.45517 8.57143L0 9.78L2.65414 12ZM9.65329 2.57143H24V4.28571H9.65329V2.57143ZM2.65414 3.42857L0.0102479 5.64L1.45517 6.85714L5.55423 3.42857L1.45517 0L0 1.20857L2.65414 3.42857Z" fill="white"/>
+        </svg>
+      </div>
+      <div data-layer="Task Categories" className="TaskCategories left-[56px] top-[20px] absolute justify-start text-white text-base font-medium font-['Inter']">Task Categories</div>
+    </div>
+    <div data-layer="Settings" data-property-1="Default" className="Settings w-72 h-14 left-[56px] top-[428px] absolute rounded-tr-lg rounded-br-lg">
+      <div data-layer="Rectangle 7" className="Rectangle7 w-72 h-14 left-0 top-0 absolute bg-zinc-300/0 rounded-2xl" />
+      <div data-layer="Settings" className="Settings left-[56px] top-[20px] absolute justify-start text-white text-base font-medium font-['Inter']">Settings</div>
+    </div>
+    <div data-layer="Help" data-property-1="Default" className="Help w-72 h-14 left-[56px] top-[497px] absolute rounded-tr-lg rounded-br-lg">
+      <div data-layer="Rectangle 7" className="Rectangle7 w-72 h-14 left-0 top-0 absolute bg-zinc-300/0 rounded-2xl" />
+      <div data-svg-wrapper data-layer="Vector" className="Vector left-[16px] top-[17px] absolute">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.94 19.2C12.36 19.2 12.7152 19.0548 13.0056 18.7644C13.296 18.474 13.4408 18.1192 13.44 17.7C13.44 17.28 13.2952 16.9248 13.0056 16.6344C12.716 16.344 12.3608 16.1992 11.94 16.2C11.52 16.2 11.1652 16.3452 10.8756 16.6356C10.586 16.926 10.4408 17.2808 10.44 17.7C10.44 18.12 10.5852 18.4752 10.8756 18.7656C11.166 19.056 11.5208 19.2008 11.94 19.2ZM10.86 14.58H13.08C13.08 13.92 13.1552 13.4 13.3056 13.02C13.456 12.64 13.8808 12.12 14.58 11.46C15.1 10.94 15.51 10.4448 15.81 9.9744C16.11 9.504 16.26 8.9392 16.26 8.28C16.26 7.16 15.85 6.3 15.03 5.7C14.21 5.1 13.24 4.8 12.12 4.8C10.98 4.8 10.0548 5.1 9.3444 5.7C8.634 6.3 8.1392 7.02 7.86 7.86L9.84 8.64C9.94 8.28 10.1652 7.89 10.5156 7.47C10.866 7.05 11.4008 6.84 12.12 6.84C12.76 6.84 13.24 7.0152 13.56 7.3656C13.88 7.716 14.04 8.1008 14.04 8.52C14.04 8.92 13.92 9.2952 13.68 9.6456C13.44 9.996 13.14 10.3208 12.78 10.62C11.9 11.4 11.36 11.99 11.16 12.39C10.96 12.79 10.86 13.52 10.86 14.58ZM12 24C10.34 24 8.78 23.6848 7.32 23.0544C5.86 22.424 4.59 21.5692 3.51 20.49C2.43 19.41 1.5752 18.14 0.9456 16.68C0.316 15.22 0.0008 13.66 0 12C0 10.34 0.3152 8.78 0.9456 7.32C1.576 5.86 2.4308 4.59 3.51 3.51C4.59 2.43 5.86 1.5752 7.32 0.9456C8.78 0.316 10.34 0.0008 12 0C13.66 0 15.22 0.3152 16.68 0.9456C18.14 1.576 19.41 2.4308 20.49 3.51C21.57 4.59 22.4252 5.86 23.0556 7.32C23.686 8.78 24.0008 10.34 24 12C24 13.66 23.6848 15.22 23.0544 16.68C22.424 18.14 21.5692 19.41 20.49 20.49C19.41 21.57 18.14 22.4252 16.68 23.0556C15.22 23.686 13.66 24.0008 12 24Z" fill="white"/>
+        </svg>
+      </div>
+      <div data-layer="Help" className="Help left-[56px] top-[20px] absolute justify-start text-white text-base font-medium font-['Inter']">Help</div>
+    </div>
+    <div data-layer="Logout" data-property-1="Default" className="Logout w-72 h-14 left-[56px] top-[821px] absolute rounded-tr-lg rounded-br-lg">
+      <div data-layer="Rectangle 7" className="Rectangle7 w-72 h-14 left-0 top-0 absolute bg-zinc-300/0 rounded-2xl" />
+      <div data-svg-wrapper data-layer="Vector" className="Vector left-[16px] top-[17px] absolute">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.6667 6.66667L16.8 8.53333L18.9333 10.6667H8V13.3333H18.9333L16.8 15.4667L18.6667 17.3333L24 12L18.6667 6.66667ZM2.66667 2.66667H12V0H2.66667C1.2 0 0 1.2 0 2.66667V21.3333C0 22.8 1.2 24 2.66667 24H12V21.3333H2.66667V2.66667Z" fill="white"/>
+        </svg>
+      </div>
+      <div data-layer="Logout" className="Logout left-[55px] top-[20px] absolute justify-start text-white text-base font-medium font-['Inter']">Logout</div>
+    </div>
+    <div data-layer="Daahboard" data-property-1="Default" className="Daahboard w-72 h-14 left-[56px] top-[221px] absolute">
+      <div data-layer="Rectangle 7" className="Rectangle7 w-72 h-14 left-0 top-0 absolute bg-zinc-300/0 rounded-2xl" />
+      <div data-svg-wrapper data-layer="Vector" className="Vector left-[24px] top-[20px] absolute">
+        <svg width="8" height="20" viewBox="0 0 8 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3.875 0C2.84729 0 1.86166 0.408258 1.13496 1.13496C0.408258 1.86166 0 2.84729 0 3.875C0 6.795 1.207 10.427 1.813 12.074C1.96964 12.4942 2.25167 12.8561 2.62086 13.1106C2.99006 13.3651 3.42858 13.5 3.877 13.497C4.781 13.497 5.616 12.955 5.94 12.079C6.546 10.439 7.75 6.825 7.75 3.875C7.75 2.84729 7.34174 1.86166 6.61504 1.13496C5.88834 0.408258 4.90271 0 3.875 0ZM3.876 14.998C3.21269 14.998 2.57655 15.2615 2.10753 15.7305C1.6385 16.1996 1.375 16.8357 1.375 17.499C1.375 18.1623 1.6385 18.7984 2.10753 19.2675C2.57655 19.7365 3.21269 20 3.876 20C4.53931 20 5.17545 19.7365 5.64447 19.2675C6.1135 18.7984 6.377 18.1623 6.377 17.499C6.377 16.8357 6.1135 16.1996 5.64447 15.7305C5.17545 15.2615 4.53931 14.998 3.876 14.998Z" fill="white"/>
+        </svg>
+      </div>
+      <div data-layer="Vital Task" className="VitalTask left-[56px] top-[20px] absolute justify-start text-white text-base font-medium font-['Inter']">Vital Task</div>
+    </div>
+  </div>
+  <div data-layer="Rectangle 29" className="Rectangle29 w-96 h-[837px] left-[406px] top-[156px] absolute rounded-2xl shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] outline outline-1 outline-zinc-400/60" />
+  <div data-layer="Rectangle 9" className="Rectangle9 w-96 h-32 left-[435px] top-[217px] absolute bg-zinc-400/20 rounded-2xl outline outline-1 outline-zinc-400" />
+  <div data-layer="Created on: 20/06/2023" className="CreatedOn20062023 left-[668px] top-[334px] absolute justify-start text-zinc-400 text-[10px] font-normal font-['Inter']">Created on: 20/06/2023</div>
+  <img data-layer="Rectangle 10" className="Rectangle10 size-20 left-[695px] top-[238px] absolute rounded-2xl" src="https://placehold.co/88x88" />
+  <div data-layer="Submit Documents" className="SubmitDocuments w-36 left-[477px] top-[225px] absolute justify-start text-black text-base font-semibold font-['Inter']">Submit Documents</div>
+  <div data-layer="Make sure to submit all the necessary docum....." className="MakeSureToSubmitAllTheNecessaryDocum w-52 left-[477px] top-[265px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">Make sure to submit all the necessary docum.....</div>
+  <div data-svg-wrapper data-layer="Vector" className="Vector left-[450px] top-[225px] absolute">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 7C1 8.5913 1.63214 10.1174 2.75736 11.2426C3.88258 12.3679 5.4087 13 7 13C8.5913 13 10.1174 12.3679 11.2426 11.2426C12.3679 10.1174 13 8.5913 13 7C13 5.4087 12.3679 3.88258 11.2426 2.75736C10.1174 1.63214 8.5913 1 7 1C5.4087 1 3.88258 1.63214 2.75736 2.75736C1.63214 3.88258 1 5.4087 1 7Z" stroke="#F21E1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div data-layer="Priority: Extreme" className="PriorityExtreme left-[477px] top-[332px] absolute justify-start"><span class="text-black text-[10px] font-normal font-['Inter']">Priority: </span><span class="text-red-600 text-[10px] font-normal font-['Inter']">Extreme</span></div>
+  <div data-layer="Status: Not Started" className="StatusNotStarted left-[563px] top-[332px] absolute justify-start"><span class="text-black text-[10px] font-normal font-['Inter']">Status: </span><span class="text-red-600 text-[10px] font-normal font-['Inter']">Not Started</span></div>
+  <div data-svg-wrapper data-layer="Vector" className="Vector left-[771px] top-[225px] absolute">
+    <svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.07444 4.14007C2.94398 4.14007 3.64888 3.32522 3.64888 2.32004C3.64888 1.31486 2.94398 0.5 2.07444 0.5C1.2049 0.5 0.5 1.31486 0.5 2.32004C0.5 3.32522 1.2049 4.14007 2.07444 4.14007Z" stroke="#A1A3AB"/>
+    </svg>
+  </div>
+  <div data-svg-wrapper data-layer="Vector" className="Vector left-[776.51px] top-[225px] absolute">
+    <svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.07444 4.14007C2.94398 4.14007 3.64888 3.32522 3.64888 2.32004C3.64888 1.31486 2.94398 0.5 2.07444 0.5C1.2049 0.5 0.5 1.31486 0.5 2.32004C0.5 3.32522 1.2049 4.14007 2.07444 4.14007Z" stroke="#A1A3AB"/>
+    </svg>
+  </div>
+  <div data-svg-wrapper data-layer="Vector" className="Vector left-[782.02px] top-[225px] absolute">
+    <svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.07444 4.14007C2.94398 4.14007 3.64888 3.32522 3.64888 2.32004C3.64888 1.31486 2.94398 0.5 2.07444 0.5C1.2049 0.5 0.5 1.31486 0.5 2.32004C0.5 3.32522 1.2049 4.14007 2.07444 4.14007Z" stroke="#A1A3AB"/>
+    </svg>
+  </div>
+  <div data-layer="Rectangle 9" className="Rectangle9 w-96 h-32 left-[435px] top-[361px] absolute rounded-2xl outline outline-1 outline-zinc-400" />
+  <div data-layer="Created on: 20/06/2023" className="CreatedOn20062023 left-[668px] top-[478px] absolute justify-start text-zinc-400 text-[10px] font-normal font-['Inter']">Created on: 20/06/2023</div>
+  <img data-layer="Rectangle 10" className="Rectangle10 size-20 left-[695px] top-[382px] absolute rounded-2xl" src="https://placehold.co/88x88" />
+  <div data-layer="Complete assignments" className="CompleteAssignments w-44 left-[477px] top-[369px] absolute justify-start text-black text-base font-semibold font-['Inter']">Complete assignments</div>
+  <div data-layer="The assignments must be completed to pass final year...." className="TheAssignmentsMustBeCompletedToPassFinalYear w-52 left-[477px] top-[409px] absolute justify-start text-neutral-500 text-sm font-normal font-['Inter']">The assignments must be completed to pass final year....</div>
+  <div data-svg-wrapper data-layer="Vector" className="Vector left-[450px] top-[369px] absolute">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 7C1 8.5913 1.63214 10.1174 2.75736 11.2426C3.88258 12.3679 5.4087 13 7 13C8.5913 13 10.1174 12.3679 11.2426 11.2426C12.3679 10.1174 13 8.5913 13 7C13 5.4087 12.3679 3.88258 11.2426 2.75736C10.1174 1.63214 8.5913 1 7 1C5.4087 1 3.88258 1.63214 2.75736 2.75736C1.63214 3.88258 1 5.4087 1 7Z" stroke="#0225FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div data-layer="Priority: Moderate" className="PriorityModerate left-[477px] top-[478px] absolute justify-start"><span class="text-black text-[10px] font-normal font-['Inter']">Priority: </span><span class="text-sky-400 text-[10px] font-normal font-['Inter']">Moderate</span></div>
+  <div data-layer="Status: In Progress" className="StatusInProgress left-[567px] top-[478px] absolute justify-start"><span class="text-black text-[10px] font-normal font-['Inter']">Status: </span><span class="text-blue-700 text-[10px] font-normal font-['Inter']">In Progress</span></div>
+  <div data-svg-wrapper data-layer="Vector" className="Vector left-[771px] top-[369px] absolute">
+    <svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.07444 4.14007C2.94398 4.14007 3.64888 3.32522 3.64888 2.32004C3.64888 1.31486 2.94398 0.5 2.07444 0.5C1.2049 0.5 0.5 1.31486 0.5 2.32004C0.5 3.32522 1.2049 4.14007 2.07444 4.14007Z" stroke="#A1A3AB"/>
+    </svg>
+  </div>
+  <div data-svg-wrapper data-layer="Vector" className="Vector left-[776.51px] top-[369px] absolute">
+    <svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.07444 4.14007C2.94398 4.14007 3.64888 3.32522 3.64888 2.32004C3.64888 1.31486 2.94398 0.5 2.07444 0.5C1.2049 0.5 0.5 1.31486 0.5 2.32004C0.5 3.32522 1.2049 4.14007 2.07444 4.14007Z" stroke="#A1A3AB"/>
+    </svg>
+  </div>
+  <div data-svg-wrapper data-layer="Vector" className="Vector left-[782.02px] top-[369px] absolute">
+    <svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.07444 4.14007C2.94398 4.14007 3.64888 3.32522 3.64888 2.32004C3.64888 1.31486 2.94398 0.5 2.07444 0.5C1.2049 0.5 0.5 1.31486 0.5 2.32004C0.5 3.32522 1.2049 4.14007 2.07444 4.14007Z" stroke="#A1A3AB"/>
+    </svg>
+  </div>
+  <div data-layer="My Tasks" className="MyTasks left-[439px] top-[175px] absolute justify-start text-black text-base font-semibold font-['Montserrat']">My Tasks</div>
+  <div data-layer="Line 1" className="Line1 w-8 h-0 left-[439px] top-[199px] absolute outline outline-2 outline-offset-[-1px] outline-orange-600"></div>
+  <div data-layer="Rectangle 29" className="Rectangle29 w-[511px] h-[837px] left-[846px] top-[157px] absolute rounded-2xl shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] outline outline-1 outline-zinc-400/60" />
+  <div data-svg-wrapper data-layer="SearchICon" className="Searchicon left-[1253px] top-[943px] absolute">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="36" height="36" rx="8" fill="#FF6767"/>
+    <path d="M12 25C12 26.1 12.9 27 14 27H22C23.1 27 24 26.1 24 25V15C24 13.9 23.1 13 22 13H14C12.9 13 12 13.9 12 15V25ZM24 10H21.5L20.79 9.29C20.61 9.11 20.35 9 20.09 9H15.91C15.65 9 15.39 9.11 15.21 9.29L14.5 10H12C11.45 10 11 10.45 11 11C11 11.55 11.45 12 12 12H24C24.55 12 25 11.55 25 11C25 10.45 24.55 10 24 10Z" fill="white"/>
+    </svg>
+  </div>
+  <div data-svg-wrapper data-layer="SearchICon" className="Searchicon left-[1301px] top-[943px] absolute">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="36" height="36" rx="8" fill="#FF6767"/>
+    <path d="M21 8.94979C22.296 8.94979 23.496 9.35979 24.477 10.0598L15.343 19.1928C15.2475 19.285 15.1713 19.3954 15.1189 19.5174C15.0665 19.6394 15.0389 19.7706 15.0377 19.9034C15.0366 20.0362 15.0619 20.1678 15.1122 20.2907C15.1625 20.4136 15.2367 20.5253 15.3306 20.6192C15.4245 20.7131 15.5361 20.7873 15.659 20.8376C15.7819 20.8879 15.9136 20.9132 16.0464 20.912C16.1792 20.9109 16.3104 20.8833 16.4324 20.8309C16.5544 20.7785 16.6648 20.7023 16.757 20.6068L25.891 11.4728C26.6141 12.4878 27.0019 13.7035 27 14.9498V24.9498C27 25.4802 26.7893 25.9889 26.4142 26.364C26.0391 26.7391 25.5304 26.9498 25 26.9498H11C10.4696 26.9498 9.96086 26.7391 9.58579 26.364C9.21071 25.9889 9 25.4802 9 24.9498V10.9498C9 10.4194 9.21071 9.91065 9.58579 9.53557C9.96086 9.1605 10.4696 8.94979 11 8.94979H21ZM27.657 8.29279C27.8445 8.48031 27.9498 8.73462 27.9498 8.99979C27.9498 9.26495 27.8445 9.51926 27.657 9.70679L25.89 11.4728C25.5006 10.9261 25.0227 10.4482 24.476 10.0588L26.242 8.29279C26.4295 8.10532 26.6838 8 26.949 8C27.2142 8 27.4695 8.10532 27.657 8.29279Z" fill="white"/>
+    </svg>
+  </div>
+  <div data-layer="Task Title: Document Submission. Objective: To submit required documents for something important Task Description: Review the list of documents required for submission and ensure all necessary documents are ready. Organize the documents accordingly and scan them if physical copies need to be submitted digitally. Rename the scanned files appropriately for easy identification and verify the accepted file formats. Upload the documents securely to the designated platform, double-check for accuracy, and obtain confirmation of successful submission. Follow up if necessary to ensure proper processing. Additional Notes: Ensure that the documents are authentic and up-to-date. Maintain confidentiality and security of sensitive information during the submission process. If there are specific guidelines or deadlines for submission, adhere to them diligently. Deadline for Submission: End of Day" className="TaskTitleDocumentSubmissionObjectiveToSubmitRequiredDocumentsForSomethingImportantTaskDescriptionReviewTheListOfDocumentsRequiredForSubmissionAndEnsureAllNecessaryDocumentsAreReadyOrganizeTheDocumentsAccordinglyAndScanThemIfPhysicalCopiesNeedToBeSubmittedDigitallyRenameTheScannedFilesAppropriatelyForEasyIdentificationAndVerifyTheAcceptedFileFormatsUploadTheDocumentsSecurelyToTheDesignatedPlatformDoubleCheckForAccuracyAndObtainConfirmationOfSuccessfulSubmissionFollowUpIfNecessaryToEnsureProperProcessingAdditionalNotesEnsureThatTheDocumentsAreAuthenticAndUpToDateMaintainConfidentialityAndSecurityOfSensitiveInformationDuringTheSubmissionProcessIfThereAreSpecificGuidelinesOrDeadlinesForSubmissionAdhereToThemDiligentlyDeadlineForSubmissionEndOfDay w-[465px] left-[868px] top-[350px] absolute justify-start"><span class="text-neutral-500 text-base font-bold font-['Inter'] leading-7">Task Title: </span><span class="text-neutral-500 text-base font-normal font-['Inter'] leading-7">Document Submission.<br/></span><span class="text-neutral-500 text-base font-bold font-['Inter'] leading-7">Objective:</span><span class="text-neutral-500 text-base font-normal font-['Inter'] leading-7"> To submit required documents for something important<br/></span><span class="text-neutral-500 text-base font-bold font-['Inter'] leading-7">Task Description:</span><span class="text-neutral-500 text-base font-normal font-['Inter'] leading-7"> Review the list of documents required for submission and ensure all necessary documents are ready. Organize the documents accordingly and scan them if physical copies need to be submitted digitally. Rename the scanned files appropriately for easy identification and verify the accepted file formats. Upload the documents securely to the designated platform, double-check for accuracy, and obtain confirmation of successful submission. Follow up if necessary to ensure proper processing.<br/></span><span class="text-neutral-500 text-base font-bold font-['Inter'] leading-7">Additional Notes:<br/></span><span class="text-neutral-500 text-base font-normal font-['Inter'] leading-7">Ensure that the documents are authentic and up-to-date.<br/>Maintain confidentiality and security of sensitive information during the submission process.<br/>If there are specific guidelines or deadlines for submission, adhere to them diligently.<br/></span><span class="text-neutral-500 text-base font-bold font-['Inter'] leading-7">Deadline for Submission: </span><span class="text-neutral-500 text-base font-normal font-['Inter'] leading-7">End of Day</span></div>
+  <div data-layer="Priority: Extreme" className="PriorityExtreme left-[1039px] top-[256px] absolute justify-start"><span class="text-black text-xs font-normal font-['Inter']">Priority: </span><span class="text-red-600 text-xs font-normal font-['Inter']">Extreme</span></div>
+  <div data-layer="Status: Not Started" className="StatusNotStarted left-[1039px] top-[287px] absolute justify-start"><span class="text-black text-xs font-normal font-['Inter']">Status: </span><span class="text-red-600 text-xs font-normal font-['Inter']">Not Started</span></div>
+  <div data-layer="Created on: 20/06/2023" className="CreatedOn20062023 left-[1039px] top-[317px] absolute justify-start text-zinc-400 text-[10px] font-normal font-['Inter']">Created on: 20/06/2023</div>
+  <div data-layer="Submit Documents" className="SubmitDocuments w-36 left-[1039px] top-[221px] absolute justify-start text-black text-base font-semibold font-['Inter']">Submit Documents</div>
+  <img data-layer="Rectangle 11" className="Rectangle11 size-40 left-[866px] top-[173px] absolute rounded-2xl" src="https://placehold.co/158x158" />
+</div>

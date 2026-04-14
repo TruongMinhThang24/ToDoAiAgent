@@ -16,6 +16,26 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
+def _extract_ws_token(websocket: WebSocket) -> str | None:
+    """
+    Ưu tiên đọc JWT từ HttpOnly cookie (flow auth hiện tại của hệ thống).
+    Fallback sang Authorization header để giữ tương thích ngược.
+    """
+    token_from_cookie = websocket.cookies.get("access_token")
+    if token_from_cookie:
+        return token_from_cookie
+
+    auth_header = websocket.headers.get("Authorization")
+    if not auth_header:
+        return None
+
+    parts = auth_header.split()
+    if len(parts) == 2 and parts[0].lower() == "bearer":
+        return parts[1]
+
+    return None
+
+
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
@@ -26,15 +46,9 @@ async def websocket_endpoint(
     Xác thực thủ công token từ header.
     """
     
-    token = None
     user = None
     try:
-        # 3. Lấy token thủ công từ header
-        auth_header = websocket.headers.get("Authorization")
-        if auth_header:
-            parts = auth_header.split()
-            if len(parts) == 2 and parts[0].lower() == "bearer":
-                token = parts[1]
+        token = _extract_ws_token(websocket)
 
         if not token:
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Missing token")

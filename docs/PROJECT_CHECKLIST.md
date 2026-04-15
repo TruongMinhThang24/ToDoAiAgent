@@ -248,3 +248,24 @@
 - [x] Verify frontend: `npm run lint` và `npm run build`.
 - [x] Tạo E2E Playwright Python: `backend/tests/e2e_task17_chat_history_upload.py`.
 - [ ] Chạy manual/E2E verify Task 17 trên môi trường đang chạy backend + frontend.
+
+### Task 18: Fix RAG / File Upload (404 Embedding Model + BYOK Upload)
+
+- [ ] Backend: đổi embedding model sang `models/embedding-001` ở luồng RAG khởi tạo.
+- [ ] Backend: bổ sung nhận `custom_api_key` cho embedding (ưu tiên key từ request, fallback env key).
+- [ ] Backend: cập nhật endpoint `POST /api/v1/chat/knowledge/upload` nhận header `X-Gemini-API-Key`.
+- [ ] Backend: truyền runtime key từ router xuống usecase/repository khi upload tài liệu.
+- [ ] Frontend: bổ sung header `X-Gemini-API-Key` cho request upload file từ `/chat`.
+- [ ] Verify backend: chạy test/chat regression bằng `pytest`.
+- [ ] Verify frontend: chạy `npm run lint` và `npm run build`.
+
+### Task 20: Xây dựng Giao diện "Phòng Trò Chuyện" (Voice-to-Voice AI)
+
+- [ ] Frontend: thêm menu item "Phòng trò chuyện" trong Sidebar/MainShell với icon Microphone và route `/voice-room`.
+- [ ] Frontend: tạo trang mới `/voice-room` và component `VoiceRoom` với UI tối giản, nút microphone lớn và trạng thái `isRecording`/`isProcessing`.
+- [ ] Frontend: triển khai logic thu âm bằng `navigator.mediaDevices.getUserMedia({ audio: true })` + `MediaRecorder`, ghép `Blob` từ audio chunks khi dừng ghi.
+- [ ] Frontend: gọi `POST /api/v1/chat/voice` bằng `FormData`, đính kèm `X-Gemini-API-Key` từ `localStorage` và phát lại audio trả về bằng `Audio`.
+- [ ] Frontend: xử lý cleanup tài nguyên audio/stream và hiển thị trạng thái/ lỗi rõ ràng khi không cấp quyền micro hoặc request thất bại.
+- [ ] Verify frontend: chạy `npm run lint` và `npm run build`.
+- [ ] E2E: tạo Playwright Python test cho flow vào Voice Room → thu âm giả lập/submit → nhận phản hồi audio theo chuẩn dự án.
+- [ ] Tạo Playwright E2E Python cho luồng upload tài liệu với BYOK.

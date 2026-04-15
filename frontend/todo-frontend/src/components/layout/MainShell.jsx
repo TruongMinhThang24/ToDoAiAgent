@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   ListTodo,
   LogOut,
+  Mic,
   Search,
   Settings,
 } from 'lucide-react';
@@ -20,7 +21,7 @@ import NotificationPopover from '@/components/overlay/NotificationPopover';
 import CalendarPopover from '@/components/overlay/CalendarPopover';
 import FloatingChatWidget from '@/components/overlay/FloatingChatWidget';
 
-const SHELL_ROUTES = ['/dashboard', '/my-task', '/todos', '/vitals', '/profile', '/chat', '/settings'];
+const SHELL_ROUTES = ['/dashboard', '/my-task', '/todos', '/vitals', '/profile', '/chat', '/voice-room', '/settings'];
 
 const isRouteActive = (pathname, href) => pathname === href || pathname.startsWith(`${href}/`);
 
@@ -29,6 +30,7 @@ const navItems = [
   { href: '/vitals', label: 'Vital Task', icon: Circle },
   { href: '/my-task', label: 'My Task', icon: CheckSquare },
   { href: '/todos', label: 'Task Categories', icon: ListTodo },
+  { href: '/voice-room', label: 'Phòng trò chuyện', icon: Mic },
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '#', label: 'Help', icon: HelpCircle },
 ];
@@ -221,7 +223,7 @@ export default function MainShell({ children }) {
         <main className="flex-1 min-w-0 overflow-auto px-4 md:px-6 lg:px-8 py-6">{children}</main>
       </div>
 
-      {pathname !== '/chat' && <FloatingChatWidget />}
+      {pathname !== '/chat' && pathname !== '/voice-room' && <FloatingChatWidget />}
     </div>
   );
 }

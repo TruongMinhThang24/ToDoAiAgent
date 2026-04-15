@@ -5,8 +5,7 @@ from typing import Optional
 
 from flashrank import Ranker
 from langgraph.checkpoint.memory import MemorySaver
-from langchain_google_genai import (ChatGoogleGenerativeAI,
-                                    GoogleGenerativeAIEmbeddings)
+from langchain_google_genai import ChatGoogleGenerativeAI
 from fastapi import HTTPException
 from ...app.usecases.rag import RAGUseCases
 from ...config.setting import settings
@@ -24,19 +23,15 @@ app_gemini_model = ChatGoogleGenerativeAI(
     google_api_key=settings.GEMINI_API_KEY
 )
 
-app_embedding_model = GoogleGenerativeAIEmbeddings(
-    model = "models/text-embedding-004",
-    google_api_key=settings.GEMINI_API_KEY
-)
-
 
 # === RAG SERVICE (Singleton) ===
 chroma_path = settings.CHROMA_PERSIST_DIRECTORY
 
 app_rag_repository = ChromaRAGRepository(
-    embedding_model=app_embedding_model,
-    persist_directory=chroma_path 
+    persist_directory=chroma_path,
+    default_api_key=settings.GEMINI_API_KEY,
 )
+app_embedding_model = app_rag_repository.embedding_model
 
 try:
     logger.info("Initializing FlashRank Reranker...")
@@ -145,7 +140,7 @@ def get_gemini_model():
 
 def get_embedding_model():
     """Dependency cung cấp mô hình embedding"""
-    return app_embedding_model
+    return app_rag_repository.embedding_model
 
 def get_rag_usecase():
     """Dependency để cung cấp RAG Usecase."""

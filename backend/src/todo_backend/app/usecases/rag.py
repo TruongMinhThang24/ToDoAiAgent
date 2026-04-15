@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List
+from typing import List, Optional
 
 from flashrank import Ranker , RerankRequest
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -28,7 +28,7 @@ class RAGUseCases:
             keep_separator=True
         )
 
-    def retrieve_context(self, user_id: int, query: str) -> str:
+    def retrieve_context(self, user_id: int, query: str, custom_api_key: Optional[str] = None) -> str:
         logger.info(f"Hybrid Search starting for user {user_id} with query: '{query}'")
         K_RETRIEVE = 20 # Lấy 20 kết quả từ mỗi phương thức
         K_RERANK = 5    # Lấy 5 kết quả tốt nhất sau cùng
@@ -38,13 +38,17 @@ class RAGUseCases:
             vector_docs = self.rag_repository.search_documents(
                 user_id=user_id, 
                 query=query, 
-                k=K_RETRIEVE
+                k=K_RETRIEVE,
+                custom_api_key=custom_api_key,
             )
 
             # === BƯỚC 2: KEYWORD SEARCH (BM25) ===
             # Lấy TẤT CẢ docs để fit BM25 (chỉ chạy khi cần)
             # Chúng ta dùng hàm mới thêm vào repository
-            all_user_docs = self.rag_repository.get_all_documents_for_user(user_id)
+            all_user_docs = self.rag_repository.get_all_documents_for_user(
+                user_id=user_id,
+                custom_api_key=custom_api_key,
+            )
             keyword_docs = []
             if all_user_docs:
                 corpus = [doc.page_content for doc in all_user_docs]
@@ -104,7 +108,12 @@ class RAGUseCases:
             logger.error(f"Error during Hybrid Search: {e}", exc_info=True)
             return "Lỗi: Không thể thực hiện tìm kiếm hybrid."
         
-    def add_document_to_knowledge_base(self, user_id: int, text: str) -> str:
+    def add_document_to_knowledge_base(
+        self,
+        user_id: int,
+        text: str,
+        custom_api_key: Optional[str] = None,
+    ) -> str:
         """Thêm tài liệu mới cho user."""
 
         chunks = self.text_splitter.split_text(text)
@@ -112,7 +121,12 @@ class RAGUseCases:
         chunk_count = 0
         for chunk in chunks:
             
-            self.rag_repository.add_document(user_id=user_id, text=chunk, metadata={})
+            self.rag_repository.add_document(
+                user_id=user_id,
+                text=chunk,
+                metadata={},
+                custom_api_key=custom_api_key,
+            )
             chunk_count += 1
 
         logger.info(f"Added {chunk_count} chunks for user {user_id}")

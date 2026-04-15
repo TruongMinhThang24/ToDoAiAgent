@@ -342,13 +342,15 @@ async def chat_history(
 async def add_document(
     request: AddDocumentRequest,
     user: user_dependency,
-    rag_usecase: rag_usecase_dependency
+    rag_usecase: rag_usecase_dependency,
+    x_gemini_api_key: Optional[str] = Header(default=None, alias="X-Gemini-API-Key"),
 ):
     """Thêm một tài liệu mới vào cơ sở kiến thức của user."""
     owner_id = user["id"]
     result = rag_usecase.add_document_to_knowledge_base(
         user_id=owner_id, 
-        text=request.text
+        text=request.text,
+        custom_api_key=x_gemini_api_key,
     )
     return {"message": result}
 
@@ -356,7 +358,8 @@ async def add_document(
 async def add_file(
     user: user_dependency,                      
     rag_usecase: rag_usecase_dependency,        
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    x_gemini_api_key: Optional[str] = Header(default=None, alias="X-Gemini-API-Key"),
 ):
     """
     Add new file (PDF, DOCX, TXT) from file upload 
@@ -443,7 +446,8 @@ async def add_file(
     # Use usecase
     result = rag_usecase.add_document_to_knowledge_base(
         user_id=owner_id,
-        text=extracted_text  
+        text=extracted_text,
+        custom_api_key=x_gemini_api_key,
     )
     return {"message": result, "file_name": file.filename, "content_type": file.content_type}  # Fix key
 

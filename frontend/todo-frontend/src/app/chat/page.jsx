@@ -137,6 +137,7 @@ export default function ChatPage() {
     if (!selectedFile) return { uploaded: false, message: null };
 
     const csrfToken = readCookie('csrf_token');
+    const runtimeGeminiKey = window.localStorage.getItem(GEMINI_KEY_STORAGE);
     const formData = new FormData();
     formData.append('file', selectedFile);
 
@@ -145,6 +146,7 @@ export default function ChatPage() {
       credentials: 'include',
       headers: {
         ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+        ...(runtimeGeminiKey ? { 'X-Gemini-API-Key': runtimeGeminiKey } : {}),
       },
       body: formData,
     });

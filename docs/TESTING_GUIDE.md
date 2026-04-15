@@ -500,3 +500,74 @@ Flow covered:
 4. Tạo thread mới, gửi message thread 2.
 5. Click lại history thread 1 và verify message cũ xuất hiện.
 6. Upload file từ UI và verify message xác nhận upload.
+
+---
+
+## Task 18: Fix RAG / File Upload (404 Embedding Model + BYOK Upload)
+
+### 1) Backend automated checks
+
+- Run in backend folder:
+  - `poetry run pytest -q tests/test_chat_ai.py`
+  - `poetry run python -m py_compile src/todo_backend/infrastructure/repositories/rag_repository_impl.py src/todo_backend/app/usecases/rag.py src/todo_backend/api/routers/chat.py src/todo_backend/infrastructure/agent/dependencies.py`
+
+Expected:
+- Không còn lỗi runtime `404 models/text-embedding-004 is not found` khi upload tài liệu.
+- Luồng upload dùng được key runtime (`X-Gemini-API-Key`) hoặc fallback env key.
+
+### 2) Frontend automated checks
+
+- Run in frontend folder:
+  - `npm run lint`
+  - `npm run build`
+
+Expected:
+- Lint pass.
+- Build pass.
+
+### 3) E2E automation (Playwright Python)
+
+- Run in backend folder (backend + frontend đang chạy):
+  - `poetry run python tests/e2e_task18_upload_byok.py`
+
+Flow covered:
+1. Tạo user test qua API (`/auth/register`) và login qua `/auth/token`.
+2. Inject cookie auth + csrf vào browser context (bypass UI login).
+3. Set runtime Gemini key vào `localStorage` (`todo_gemini_api_key`).
+4. Upload file `.txt` từ UI Chat và bấm `Send` (không nhập text).
+5. Verify request upload có header `X-Gemini-API-Key` và UI hiển thị thông báo upload thành công.
+
+---
+
+## Task 20: Xây dựng Giao diện "Phòng Trò Chuyện" (Voice-to-Voice AI)
+
+### 1) Backend automated checks
+
+- Run in backend folder:
+  - `poetry run pytest -q`
+
+Expected:
+- Test suite passes.
+- No regression in existing auth/chat/todo tests.
+
+### 2) Frontend automated checks
+
+- Run in frontend folder:
+  - `npm run lint`
+  - `npm run build`
+
+Expected:
+- Lint pass.
+- Build pass.
+
+### 3) E2E automation (Playwright Python)
+
+- Run in backend folder (backend + frontend đang chạy):
+  - `poetry run python tests/e2e_task20_voice_room.py`
+
+Flow covered:
+1. Tạo user test qua API (`/auth/register`) và login qua `/auth/token`.
+2. Inject cookie auth vào browser context để bypass UI login.
+3. Inject `todo_gemini_api_key` vào `localStorage`.
+4. Mở `/voice-room`, bấm ghi âm, rồi bấm dừng ghi âm.
+5. Mô phỏng `MediaRecorder` + `getUserMedia`, xác nhận request tới `/api/v1/chat/voice` có `X-Gemini-API-Key` và UI chạy qua các trạng thái nghe/xử lý/phát lại.

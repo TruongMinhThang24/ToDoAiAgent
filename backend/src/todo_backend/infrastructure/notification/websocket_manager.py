@@ -1,6 +1,6 @@
 # backend/src/todo_backend/infrastructure/notification/websocket_manager.py
 import logging
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from fastapi import WebSocket
 
@@ -29,7 +29,8 @@ class WebSocketManager(NotificationRepository):
     def disconnect(self, user_id: int, websocket: WebSocket):
         """Xóa kết nối khi người dùng ngắt kết nối."""
         if user_id in self.active_connections:
-            self.active_connections[user_id].remove(websocket)
+            if websocket in self.active_connections[user_id]:
+                self.active_connections[user_id].remove(websocket)
             if not self.active_connections[user_id]:
                 del self.active_connections[user_id]
             logger.info(f"WebSocket disconnected: User {user_id}")
@@ -39,15 +40,25 @@ class WebSocketManager(NotificationRepository):
         Gửi tin nhắn đến tất cả các kết nối (tab trình duyệt)
         của một user_id cụ thể.
         """
+        payload = {
+            "event": "notification.message",
+            "message": message,
+        }
+        await self.send_json_to_user(user_id, payload)
+
+    async def send_json_to_user(self, user_id: int, payload: Dict[str, Any]):
+        """
+        Gửi payload JSON đến tất cả các kết nối của user.
+        """
         if user_id in self.active_connections:
-            connections = self.active_connections[user_id]
-            logger.info(f"Sending message to User {user_id} ({len(connections)} connections): {message}")
+            connections = list(self.active_connections[user_id])
+            logger.info(f"Sending WS payload to User {user_id} ({len(connections)} connections)")
             for connection in connections:
                 try:
-                    await connection.send_text(message)
+                    await connection.send_json(payload)
                 except Exception as e:
                     logger.error(f"Failed to send message to User {user_id}: {e}")
-                    # Có thể xóa kết nối hỏng tại đây nếu cần
+                    self.disconnect(user_id, connection)
 
 # --- QUAN TRỌNG: Tạo một Singleton Instance ---
 # Chúng ta cần MỘT trung tâm quản lý duy nhất

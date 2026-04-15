@@ -1,32 +1,21 @@
 # backend/src/todo_backend/app/scheduler.py
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.orm import Session
 
+from todo_backend.app.usecases.notification_center import NotificationCenterUseCases
 from todo_backend.domain.entities.models import Todo
 from todo_backend.infrastructure.database.database import sessionLocal
-
-# --- (THAY ĐỔI) ---
-# 1. Import UseCase và Singleton Manager
-from todo_backend.app.usecases.notification import NotificationUseCases
-from todo_backend.infrastructure.notification.websocket_manager import \
-    websocket_manager
-
-# --- (HẾT THAY ĐỔI) ---
+from todo_backend.infrastructure.repositories.notification_center_repository_impl import (
+    NotificationCenterRepositoryImpl,
+)
 
 # Thiết lập logger
 logger = logging.getLogger(__name__)
 
-# --- (THAY ĐỔI) ---
-# 2. Khởi tạo UseCase, tiêm (inject) singleton manager vào
-#    vì scheduler chạy riêng biệt, chúng ta cần dùng instance cụ thể.
-notification_use_cases = NotificationUseCases(notification_repo=websocket_manager)
-
-# 3. Chuyển hàm thành async
 async def check_due_todos():
-# --- (HẾT THAY ĐỔI) ---
     """
     Hàm này được gọi bởi scheduler.
     Nó tạo một session DB riêng biệt để kiểm tra các todo sắp hết hạn.
@@ -34,32 +23,43 @@ async def check_due_todos():
     logger.info("Scheduler: Đang chạy tác vụ kiểm tra todo sắp hết hạn...")
     db: Session = sessionLocal()
     try:
-        # --- (THAY ĐỔI QUAN TRỌNG) ---
-        # Lấy thời gian UTC hiện tại, nhưng ở dạng NAIVE (không có múi giờ)
-        # để so sánh chính xác với CSDL (vốn cũng lưu naive UTC)
-        now_utc_naive = datetime.utcnow() 
-        # (Lưu ý: datetime.utcnow() là cách đơn giản nhất cho việc này)
-        # ---
-        due_soon_limit_naive = now_utc_naive + timedelta(minutes=5)
-        
-        upcoming_todos = db.query(Todo).filter(
-            Todo.due_date >= now_utc_naive,
-            Todo.due_date <= due_soon_limit_naive,
-            Todo.completed == False
-        ).all()
+        # Chuẩn hoá timestamp theo UTC aware để tránh lệch timezone.
+        now_utc = datetime.now(timezone.utc)
+        end_time_utc = now_utc + timedelta(minutes=15)
+
+        # Database `due_date` hiện đang lưu dạng DATETIME naive UTC.
+        # Vì vậy ta convert về naive UTC khi build query SQL.
+        now_for_db = now_utc.replace(tzinfo=None)
+        end_time_for_db = end_time_utc.replace(tzinfo=None)
+
+        logger.info(
+            "Scheduler window: due_date from %s to %s",
+            now_utc.isoformat(),
+            end_time_utc.isoformat(),
+        )
+
+        query = db.query(Todo).filter(
+            Todo.due_date >= now_for_db,
+            Todo.due_date <= end_time_for_db,
+            Todo.completed == False,
+        )
+
+        # Chỉ áp dụng nếu schema hiện có cột is_notified.
+        if hasattr(Todo, "is_notified"):
+            query = query.filter(Todo.is_notified == False)
+
+        upcoming_todos = query.all()
         if not upcoming_todos:
             logger.info("Scheduler: Không tìm thấy todo nào sắp hết hạn.")
+
+        notification_service = NotificationCenterUseCases(NotificationCenterRepositoryImpl(db))
         
         for todo in upcoming_todos:
-            # --- (THAY ĐỔI) ---
-            # 4. Thay thế logger.warning bằng UseCase
             logger.warning(
                 f"REMINDER: Todo (ID: {todo.id}) - '{todo.title}' "
                 f"sẽ hết hạn lúc {todo.due_date}"
             )
-            # GỌI USE CASE ĐỂ GỬI WEBSOCKET
-            await notification_use_cases.send_reminder_notification(todo)
-            # --- (HẾT THAY ĐỔI) ---
+            await notification_service.create_due_soon_notification(todo)
 
     except Exception as e:
         logger.error(f"Scheduler: Lỗi khi kiểm tra todos: {e}")

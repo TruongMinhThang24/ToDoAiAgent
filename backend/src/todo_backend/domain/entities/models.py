@@ -91,6 +91,23 @@ class ChatMessage(Base):
 
 Index("ix_chat_messages_owner_thread_created", ChatMessage.owner_id, ChatMessage.thread_id, ChatMessage.created_at)
 
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    type = Column(String(100), nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    metadata_json = Column("metadata", JSON, nullable=True)
+    is_read = Column(Boolean, default=False, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    read_at = Column(DateTime, nullable=True)
+
+
+Index("ix_notifications_user_read_created", Notification.user_id, Notification.is_read, Notification.created_at)
+
 # Sử dụng SQLAlchemy Events để log các sự kiện
 @event.listens_for(Users, "after_insert")
 def log_user_insert(mapper, connection, target):
